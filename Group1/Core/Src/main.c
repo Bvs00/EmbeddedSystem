@@ -158,7 +158,19 @@ void SystemClock_Config(void)
  * Di seguito facciamo la callback per il timer
  */
 
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
+	if (htim->Instance == TIM10){
+		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 
+		// Lettura temperatura
+
+
+
+
+
+	}
+}
 
 
 
