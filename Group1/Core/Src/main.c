@@ -32,6 +32,20 @@
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 
+// We define the all treshould
+enum Threshould{
+	goodMeasureTime = 10,
+	countFail = 5,
+	highTemperature = 37,
+	highHeartRate = 120,
+	lowOxygen = 97,
+};
+
+Flag* getFlag(void){
+	static Flag flag;
+	return &flag;
+}
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -164,6 +178,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
 
 		// Lettura temperatura
+
+
+		// Lettura Cardio
+
+
+		// Lettura Ossigenazione
+
+
 
 
 
