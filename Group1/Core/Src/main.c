@@ -27,23 +27,27 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "string.h"
+#include "KY028.h"
+#include "action.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 
-// We define the all treshould
-enum Threshould{
-	goodMeasureTime = 10,
-	countFail = 5,
-	highTemperature = 37,
-	highHeartRate = 120,
-	lowOxygen = 97,
-};
 
 Flag* getFlag(void){
 	static Flag flag;
 	return &flag;
+}
+
+Measure* getCount(void){
+	static Measure measure;
+	return &measure;
+}
+
+Sensor* getSensor(void){
+	static Sensor sensors;
+	return &sensors;
 }
 
 /* USER CODE END PTD */
@@ -108,9 +112,21 @@ int main(void)
   MX_USART2_UART_Init();
   MX_ADC1_Init();
   MX_TIM10_Init();
+  MX_TIM11_Init();
   /* USER CODE BEGIN 2 */
-  HAL_TIM_OC_Start(&htim1, TIM_CHANNEL_1);  // Inizializzazione PWM
-  HAL_TIM_Base_Start_IT(&htim10);  // Inizializzazione TIM BASE
+  HAL_TIM_OC_Start(&htim1, TIM_CHANNEL_1);  // Inizializzazione PWM canale 1
+  HAL_TIM_OC_Start(&htim1, TIM_CHANNEL_2);  // Inizializzazione PWM canale 2
+  HAL_TIM_Base_Start_IT(&htim10);  // Inizializzazione TIM BASE 10
+  HAL_TIM_Base_Start_IT(&htim11);  // Inizializzazione TIM BASE 11
+
+  // inizializzare MAX
+  Sensor* sensors = getSensor();
+  begin(&sensors->max, &hi2c1, GPIOC, GPIOC, GPIO_PIN_0, GPIO_PIN_1);
+  config_sensor(&sensors->max, MODE_ONE);
+
+  // PollingMode per l'ADC
+  HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
+
 
 
   /* USER CODE END 2 */
@@ -119,6 +135,8 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -175,9 +193,89 @@ void SystemClock_Config(void)
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	if (htim->Instance == TIM10){
-		HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5);
+
+		Flag* flags = getFlag();
+		Measure* measure = getMeasure();
+		uint32_t previousValue;
+
+		measure->countTot += 1;
+
+		// attivo il sensore della temperatura, che è gia attivato dal polling
+		uint32_t temperature = getTemperature();
+		if ((temperature< highConfTemp) && (temperature >lowConfTemp)){
+			measure->sumTemp += temperature;
+			measure->goodTemp++;
+		}
+		// attivo il sensore MAX32664
+		read_sensor(&sensors->max);
+		if(sensors->max.algorithm_state == 3){
+
+			uint32_t heartRate = sensors->max.heart_rate;
+			uint32_t oxygen = sensors->max.oxygen;
+
+			if ((heartRate < highConfHeartRate) && (heartRate > lowConfHeartRate)){
+				measure->sumHeartRate += heartRate;
+				measure->goodHeartRate++;
+			}
+			if ((oxygen < highConfOxygen) && (oxygen > lowConfOxygen)){
+				measure->sumOxygen += oxygen;
+				measure->goodOxygen++;
+			}
+		}
+
+		// Qui ho tutte le somme delle misure
+		// Devo controllare se ho finito il numero di misurazioni
+		// In questa fase attivo le flag e solo qui dentro mostro le azioni
+
+		if (measure->countTot >= goodMeasureTime){  // se ho effettuato le misurazioni per tempo = a goodMeasureTime
+
+			// controllo se le misurazioni del tempo possono essere valutate
+			if (measure->goodTemp >= goodNumberMeasure){
+				measure->badValueTemp = 0;
+
+				computeAverageTemp();
+				if (measure->averageValueTemp < highTemperature){
+					flags->highTemperatureFlag = false;
+					// mostrare a video il suo contenuto
+				}else{
+					// conseguenza di avere la febbre
+					flags->highTemperatureFlag = true;
+				}
+				// posso calcolare il valore medio della misura del tempo e mostrarla a video
+			}else{
+				measure->badValueTemp++;
+				// mostro a video il simbolo nullo
+			}
+
+			// controllo se le misurazioni del battito cardiaco possono essere valutate
+			if (measure->goodHeartRate >= goodNumberMeasure){
+				measure->badValueHeartRate = 0;
+				// posso calcolare il valore medio della misura del battito cardiaco e mostrarla a video
+			}else{
+				measure->badValueHeartRate++;
+				// mostro a video il simbolo nullo
+			}
+
+			// controllo se le misurazioni dell'ossigenazione possono essere valutate
+			if (measure->goodOxygen >= goodNumberMeasure){
+				measure->badValueOxygen = 0;
+				// posso calcolare il valore medio della misura dell'ossigenazione e mostrarla a video
+			}else{
+				measure->badValueOxygen++;
+				// mostro a video il simbolo nullo
+			}
+
+		}
+		// controllo se i badValue sono pari a countFail per far in modo che compaia una schermata di riposizionamento dito
+		if ((measure->badValueHeartRate >= countFail) || (measure->badValueOxygen >= countFail) || (measure->badValueTemp >= countFail)){
+			// devo mostrare la schermata di posizionamento dito
+		}
+
+
+
 
 		// Lettura temperatura
+
 
 
 		// Lettura Cardio
@@ -187,11 +285,83 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 
 
+		// if-else di controllo
+		if(flags->arrhythmia){
+
+		}else if(flags->covid){
+
+		}else{
+
+		}
+		if(flags->failCount){
+
+		}
+
+
 
 
 
 
 	}
+
+	// TIM11
+	if (htim->Instance == TIM11){
+
+			if ((TIM1->CCER & TIM_CCER_CC1E) != 0){
+				Measure measures = getMeasure();
+
+
+
+				uint32_t timeOffOnComplete = 20;
+				uint32_t timeInspirationOrEspriration = 4500;
+				uint32_t intervall = 1000;
+				uint32_t passValue;
+
+				if (measures->ledCounter >= 2*(timeInspirationOrEspriration - 1 )){
+					measures->ledCounter = -1 * intervall;
+				}
+				if (measures->ledCounter >= (timeInspirationOrEspriration - 1)){
+					passValue = measures->ledCounter - 2 * (measures->ledCounter - (timeInspirationOrEspriration - 1 ));
+				}else{
+					passValue = measures->ledCounter;
+				}
+
+				if ((passValue <= 0 || passValue >= (timeInspirationOrEspriration -1 - (timeOffOnComplete/2)))){
+					passValue = 0;
+				}else{
+					passValue = ((passValue * 100) / (timeInspirationOrEspriration - 1 ));
+				}
+
+				__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, passValue);
+
+				measures->ledCounter += 1;
+			}
+
+			if ((TIM1->CCER & TIM_CCER_CC2E) != 0){
+				Measure measures = getMeasure();
+
+				uint32_t interval = 200;
+
+				if (measures->noteCount >= 0 * interval && measures->noteCount < 1 * interval){
+					__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, (uint32_t)30);
+
+				}else if(measures->noteCount >= 1 * interval && measures->noteCount < 2 * interval){
+					__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, (uint32_t)60);
+
+				}else if(measures->noteCount >= 2 * interval && measures->noteCount < 3 * interval){
+					__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, (uint32_t)90);
+
+				}else if(measures->noteCount >= 3 * interval){
+					measures->noteCount = 0;
+				}
+
+				measures->noteCount++;
+			}
+
+
+	}
+
+
 }
 
 
