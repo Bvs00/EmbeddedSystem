@@ -1,6 +1,13 @@
 
 #include "MAX32664.h"
 
+
+MAX32664* getSensor(void){
+	static MAX32664 max;
+	return &max;
+}
+
+
 /*
  * This function allows to change the mode of the MFIO pin of the MAX32664 from an output pin to an input pin
  */

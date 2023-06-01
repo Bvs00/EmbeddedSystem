@@ -64,7 +64,7 @@
 #define OK 0
 #define ERROR (-1)
 
-struct MAX32664_sensor{
+typedef struct {
 	uint16_t reset;
 	uint16_t mfio;
 	GPIO_TypeDef* reset_gpio;
@@ -80,9 +80,9 @@ struct MAX32664_sensor{
     uint8_t algorithm_state;
     uint16_t ib_interval;
 	uint8_t mode;
-};
+}MAX32664;
 
-typedef struct MAX32664_sensor MAX32664;
+MAX32664* getSensor(void);
 
 void mfio(MAX32664* max32664);
 uint8_t begin(MAX32664* sensor,I2C_HandleTypeDef *i2c_port, GPIO_TypeDef* reset_pin_gpio,GPIO_TypeDef* mfio_pin_gpio, uint16_t reset_pin, uint16_t mfio_pin);

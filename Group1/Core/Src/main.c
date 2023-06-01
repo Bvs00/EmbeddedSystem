@@ -29,6 +29,7 @@
 #include "string.h"
 #include "KY028.h"
 #include "action.h"
+#include "MAX32664.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -40,15 +41,11 @@ Flag* getFlag(void){
 	return &flag;
 }
 
-Measure* getCount(void){
+Measure* getMeasure(void){
 	static Measure measure;
 	return &measure;
 }
 
-Sensor* getSensor(void){
-	static Sensor sensors;
-	return &sensors;
-}
 
 /* USER CODE END PTD */
 
@@ -120,9 +117,9 @@ int main(void)
   HAL_TIM_Base_Start_IT(&htim11);  // Inizializzazione TIM BASE 11
 
   // inizializzare MAX
-  Sensor* sensors = getSensor();
-  begin(&sensors->max, &hi2c1, GPIOC, GPIOC, GPIO_PIN_0, GPIO_PIN_1);
-  config_sensor(&sensors->max, MODE_ONE);
+  MAX32664* max = getSensor();
+  begin(max, &hi2c1, GPIOC, GPIOC, GPIO_PIN_0, GPIO_PIN_1);
+  config_sensor(max, MODE_ONE);
 
   // PollingMode per l'ADC
   HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
@@ -196,6 +193,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 		Flag* flags = getFlag();
 		Measure* measure = getMeasure();
+		MAX32664* max = getSensor();
+
 		uint32_t previousValue;
 
 		measure->countTot += 1;
@@ -207,11 +206,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			measure->goodTemp++;
 		}
 		// attivo il sensore MAX32664
-		read_sensor(&sensors->max);
-		if(sensors->max.algorithm_state == 3){
+		read_sensor(max);
+		if(max->algorithm_state == 3){
 
-			uint32_t heartRate = sensors->max.heart_rate;
-			uint32_t oxygen = sensors->max.oxygen;
+			uint32_t heartRate = max->heart_rate;
+			uint32_t oxygen = max->oxygen;
 
 			if ((heartRate < highConfHeartRate) && (heartRate > lowConfHeartRate)){
 				measure->sumHeartRate += heartRate;
@@ -308,7 +307,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	if (htim->Instance == TIM11){
 
 			if ((TIM1->CCER & TIM_CCER_CC1E) != 0){
-				Measure measures = getMeasure();
+				Measure* measures = getMeasure();
 
 
 
@@ -338,7 +337,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			}
 
 			if ((TIM1->CCER & TIM_CCER_CC2E) != 0){
-				Measure measures = getMeasure();
+				Measure* measures = getMeasure();
 
 				uint32_t interval = 200;
 

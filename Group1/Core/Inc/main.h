@@ -32,7 +32,6 @@ extern "C" {
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "stdbool.h"
-#include "MAX32664.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -133,14 +132,14 @@ typedef struct{
 	uint32_t averageValueOxygen;
 }Measure;
 
-typedef struct{
-	MAX32664 max;
-}Sensor;
+//typedef struct{
+//	MAX32664 max;
+//}Sensor;
 
 
 Flag* getFlag(void);
 Measure* getMeasure(void);
-Sensor* getSensor(void);
+//Sensor* getSensor(void);
 
 /* USER CODE END Private defines */
 
