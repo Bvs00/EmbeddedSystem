@@ -91,14 +91,14 @@ enum Threshould{
 };
 
 typedef struct{
-	bool failCount;  	// flag da attivare quando abbiamo un elevato numero di conteggi senza risultati
-	bool lowFever;      // flag da attivare in caso di febbre
-	bool tachycardia;  	// flag da attivare quando si ha un heartRate alto
-	bool hypoxemia;    	// flag da attivare quando si ha una bassa ossigenazione
-	bool covid;			// flag da attivare quando si ha una bassa ossigenazione e un alta temperatura corporea
-	bool middleFever; 	// flag da attivare quando si ha un'alta temperatura e un alto heartRate
-	bool arrhythmia;	// flag da attivare quando si ha battito alto e bassa ossigenzione
-	bool highFever;		// flag da attivare quando si ha temperatura alta, bassa ossigenazione e battiti alti
+//	bool failCount;  	// flag da attivare quando abbiamo un elevato numero di conteggi senza risultati
+//	bool lowFever;      // flag da attivare in caso di febbre
+//	bool tachycardia;  	// flag da attivare quando si ha un heartRate alto
+//	bool hypoxemia;    	// flag da attivare quando si ha una bassa ossigenazione
+//	bool covid;			// flag da attivare quando si ha una bassa ossigenazione e un alta temperatura corporea
+//	bool middleFever; 	// flag da attivare quando si ha un'alta temperatura e un alto heartRate
+//	bool arrhythmia;	// flag da attivare quando si ha battito alto e bassa ossigenzione
+//	bool highFever;		// flag da attivare quando si ha temperatura alta, bassa ossigenazione e battiti alti
 
 	// buone (forse)
 	bool highTemperatureFlag;

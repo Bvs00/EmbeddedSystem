@@ -195,7 +195,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		Measure* measure = getMeasure();
 		MAX32664* max = getSensor();
 
-		uint32_t previousValue;
+		uint32_t previousValueTemp, previousValueHeartRate, previousValueOxygen;
 
 		measure->countTot += 1;
 
@@ -232,71 +232,86 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			if (measure->goodTemp >= goodNumberMeasure){
 				measure->badValueTemp = 0;
 
+				previousValueTemp = measure->averageValueTemp;
+
 				computeAverageTemp();
-				if (measure->averageValueTemp < highTemperature){
-					flags->highTemperatureFlag = false;
-					// mostrare a video il suo contenuto
-				}else{
-					// conseguenza di avere la febbre
-					flags->highTemperatureFlag = true;
-				}
-				// posso calcolare il valore medio della misura del tempo e mostrarla a video
+
+				flags->highTemperatureFlag = (measure->averageValueTemp < highTemperature) ? false : true;
+
+
 			}else{
 				measure->badValueTemp++;
-				// mostro a video il simbolo nullo
 			}
 
 			// controllo se le misurazioni del battito cardiaco possono essere valutate
 			if (measure->goodHeartRate >= goodNumberMeasure){
 				measure->badValueHeartRate = 0;
-				// posso calcolare il valore medio della misura del battito cardiaco e mostrarla a video
+
+				previousValueHeartRate = measure->averageValueHeartRate;
+
+				computeAverageHeartRate();
+
+				flags->highHeartRateFlag = (measure->averageValueHeartRate < highHeartRate) ? false : true;
+
 			}else{
 				measure->badValueHeartRate++;
-				// mostro a video il simbolo nullo
 			}
 
 			// controllo se le misurazioni dell'ossigenazione possono essere valutate
 			if (measure->goodOxygen >= goodNumberMeasure){
 				measure->badValueOxygen = 0;
-				// posso calcolare il valore medio della misura dell'ossigenazione e mostrarla a video
+
+				previousValueOxygen = measure->averageValueOxygen;
+
+				computeAverageOxygen();
+
+				flags->lowOxygenFlag = (measure->averageValueOxygen < lowOxygen) ? false : true;
+
 			}else{
 				measure->badValueOxygen++;
-				// mostro a video il simbolo nullo
 			}
 
 		}
+
 		// controllo se i badValue sono pari a countFail per far in modo che compaia una schermata di riposizionamento dito
 		if ((measure->badValueHeartRate >= countFail) || (measure->badValueOxygen >= countFail) || (measure->badValueTemp >= countFail)){
 			// devo mostrare la schermata di posizionamento dito
 		}
 
+		// controllare quali flag sono attive per mostrare le diverse schermate
 
-
-
-		// Lettura temperatura
-
-
-
-		// Lettura Cardio
-
-
-		// Lettura Ossigenazione
-
-
-
-		// if-else di controllo
-		if(flags->arrhythmia){
-
-		}else if(flags->covid){
-
-		}else{
-
+		// 0-0-0
+		if (!flags->highTemperatureFlag && !flags->highHeartRateFlag && !flags->lowOxygenFlag){
+			// TUTTO BENE
 		}
-		if(flags->failCount){
-
+		// 0-0-1
+		if (!flags->highTemperatureFlag && !flags->highHeartRateFlag && flags->lowOxygenFlag){
+					// IPOSSIEMIA
 		}
-
-
+		// 0-1-0
+		if (!flags->highTemperatureFlag && flags->highHeartRateFlag && !flags->lowOxygenFlag){
+					// TACHICARDIA
+		}
+		// 0-1-1
+		if (!flags->highTemperatureFlag && flags->highHeartRateFlag && flags->lowOxygenFlag){
+					// ARITMIA
+		}
+		// 1-0-0
+		if (flags->highTemperatureFlag && !flags->highHeartRateFlag && !flags->lowOxygenFlag){
+					// FEBBRE
+		}
+		// 1-0-1
+		if (flags->highTemperatureFlag && !flags->highHeartRateFlag && flags->lowOxygenFlag){
+					// COVID
+		}
+		// 1-1-0
+		if (flags->highTemperatureFlag && flags->highHeartRateFlag && !flags->lowOxygenFlag){
+					// FEBBRE ALTA
+		}
+		// 1-1-1
+		if (flags->highTemperatureFlag && flags->highHeartRateFlag && flags->lowOxygenFlag){
+					// FEBBRE MOLTO ALTA
+		}
 
 
 
