@@ -30,6 +30,7 @@
 #include "KY028.h"
 #include "action.h"
 #include "MAX32664.h"
+#include "ssd1306.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -45,6 +46,41 @@ Measure* getMeasure(void){
 	static Measure measure;
 	return &measure;
 }
+
+const uint8_t heartPic[] = {
+        // 'heartPic', 23x20px
+        0x0f, 0x01, 0xe0, 0x3f, 0xc7, 0xf8, 0x7f, 0xef, 0xfc, 0x7f, 0xff, 0xfc, 0xff, 0xff, 0xfe, 0xff,
+        0xff, 0xfe, 0xff, 0xff, 0xfe, 0xff, 0xff, 0xfe, 0x7f, 0xff, 0xfc, 0x7f, 0xff, 0xfc, 0x3f, 0xff,
+        0xf8, 0x1f, 0xff, 0xf0, 0x0f, 0xff, 0xe0, 0x07, 0xff, 0xc0, 0x03, 0xff, 0x80, 0x01, 0xff, 0x00,
+        0x00, 0xfe, 0x00, 0x00, 0x7c, 0x00, 0x00, 0x38, 0x00, 0x00, 0x10, 0x00
+};
+
+const uint8_t tempPic[] = {
+        // 'tempPic', 20x20px
+        0x00, 0x60, 0x00, 0x00, 0xf0, 0x00, 0x01, 0x98, 0x00, 0x01, 0x68, 0x00, 0x01, 0x60, 0x00, 0x01,
+        0x60, 0x00, 0x01, 0x60, 0x00, 0x01, 0x60, 0x00, 0x01, 0x68, 0x00, 0x01, 0x68, 0x00, 0x01, 0x68,
+        0x00, 0x01, 0x68, 0x00, 0x01, 0x68, 0x00, 0x02, 0x64, 0x00, 0x02, 0xf4, 0x00, 0x06, 0xf6, 0x00,
+        0x02, 0xf4, 0x00, 0x03, 0x0c, 0x00, 0x01, 0x98, 0x00, 0x00, 0xf0, 0x00
+};
+
+const uint8_t oxygenPic[] = {
+        // 'oxygenPic', 20x20px
+        0x00, 0x00, 0x00, 0x07, 0x00, 0x00, 0x00, 0x80, 0x00, 0x04, 0x80, 0x00, 0x07, 0x03, 0xc0, 0x00,
+        0x06, 0x20, 0x00, 0x04, 0x10, 0x06, 0x04, 0x10, 0x10, 0xc5, 0x10, 0x20, 0x22, 0x20, 0x41, 0x01,
+        0xc0, 0x80, 0x90, 0x00, 0x80, 0x40, 0x00, 0x80, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x10, 0x00,
+        0x40, 0x20, 0x00, 0x20, 0x20, 0x00, 0x19, 0x80, 0x00, 0x00, 0x00, 0x00,
+
+};
+
+const uint8_t alertPic[] = {
+        // 'alertPic', 20x20px
+        0x00, 0x00, 0x00, 0x00, 0x60, 0x00, 0x00, 0xf0, 0x00, 0x01, 0xf8, 0x00, 0x03, 0xfc, 0x00, 0x03,
+        0x9c, 0x00, 0x07, 0x9e, 0x00, 0x07, 0x9e, 0x00, 0x0f, 0x9f, 0x00, 0x1f, 0x9f, 0x80, 0x1f, 0x9f,
+        0x80, 0x3f, 0x9f, 0xc0, 0x3f, 0xff, 0xc0, 0x7f, 0x9f, 0xe0, 0xff, 0x0f, 0xf0, 0xff, 0x0f, 0xf0,
+        0xff, 0xff, 0xf0, 0x7f, 0xff, 0xe0, 0x3f, 0xff, 0xc0, 0x00, 0x00, 0x00
+
+};
+
 
 
 /* USER CODE END PTD */
@@ -123,6 +159,11 @@ int main(void)
 
   // PollingMode per l'ADC
   HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
+
+  // Inizializzare Oled
+  ssd1306_Init();
+  ssd1306_Fill(Black);
+
 
 
 
@@ -276,6 +317,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		// controllo se i badValue sono pari a countFail per far in modo che compaia una schermata di riposizionamento dito
 		if ((measure->badValueHeartRate >= countFail) || (measure->badValueOxygen >= countFail) || (measure->badValueTemp >= countFail)){
 			// devo mostrare la schermata di posizionamento dito
+
 		}
 
 		// controllare quali flag sono attive per mostrare le diverse schermate
@@ -283,34 +325,81 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		// 0-0-0
 		if (!flags->highTemperatureFlag && !flags->highHeartRateFlag && !flags->lowOxygenFlag){
 			// TUTTO BENE
+
+
+
 		}
 		// 0-0-1
 		if (!flags->highTemperatureFlag && !flags->highHeartRateFlag && flags->lowOxygenFlag){
 					// IPOSSIEMIA
+			if(previousValueOxygen < lowOxygen){
+				// NON è la prima volta quindi devo far comparire solo lo schermo con i danger
+			}else{
+				// è la prima volta far comparire lo schermo che dice IPOSSIEMIA
+			}
+
 		}
 		// 0-1-0
 		if (!flags->highTemperatureFlag && flags->highHeartRateFlag && !flags->lowOxygenFlag){
 					// TACHICARDIA
+			if(previousValueHeartRate > highHeartRate){
+				// NON è la prima volta quindi devo far comparire solo lo schermo con i danger
+			}else{
+				// è la prima volta far comparire lo schermo che dice TACHICARDIA
+			}
 		}
 		// 0-1-1
 		if (!flags->highTemperatureFlag && flags->highHeartRateFlag && flags->lowOxygenFlag){
 					// ARITMIA
+			if ((previousValueHeartRate > highHeartRate) && (previousValueOxygen < lowOxygen)){
+				// NON è la prima volta che accade l'ARITMIA
+			}
+			else{
+				// è la prima volta e quindi far comparire ARITMIA
+			}
+
 		}
 		// 1-0-0
 		if (flags->highTemperatureFlag && !flags->highHeartRateFlag && !flags->lowOxygenFlag){
 					// FEBBRE
+			if(previousValueTemp > highTemperature){
+				// NON è la prima volta quindi devo far comparire solo lo schermo con i danger
+			}else{
+				// è la prima volta far comparire lo schermo che dice FEBBRE
+			}
+
 		}
 		// 1-0-1
 		if (flags->highTemperatureFlag && !flags->highHeartRateFlag && flags->lowOxygenFlag){
 					// COVID
+			if ((previousValueTemp > highTemperature) && (previousValueOxygen < lowOxygen)){
+				// NON è la prima volta che accade COVID
+			}
+			else{
+				// è la prima volta e quindi far comparire COVID
+			}
+
 		}
 		// 1-1-0
 		if (flags->highTemperatureFlag && flags->highHeartRateFlag && !flags->lowOxygenFlag){
 					// FEBBRE ALTA
+			if ((previousValueTemp > highTemperature) && (previousValueHeartRate > highHeartRate)){
+				// NON è la prima volta che accade FEBBRE ALTA
+			}
+			else{
+				// è la prima volta e quindi far comparire FEBBRE ALTA
+			}
+
 		}
 		// 1-1-1
 		if (flags->highTemperatureFlag && flags->highHeartRateFlag && flags->lowOxygenFlag){
 					// FEBBRE MOLTO ALTA
+			if ((previousValueTemp > highTemperature) && (previousValueHeartRate > highHeartRate) && (previousValueOxygen < lowOxygen)){
+				// NON è la prima volta che accade FEBBRE MOLTO ALTA
+			}
+			else{
+				// è la prima volta e quindi far comparire FEBBRE MOLTO ALTA
+			}
 		}
 
 

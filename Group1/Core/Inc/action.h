@@ -9,3 +9,4 @@ void computeAverageTemp(void);
 void computeAverageHeartRate(void);
 
 void computeAverageOxygen(void);
+
