@@ -382,7 +382,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 					}else{
 						// è la prima volta far comparire lo schermo che dice IPOSSIEMIA
 						measure->dangerShowing = 0;
-						//showDangerIpossimeia();
+						showDangerIpossimeia();
 					}
 
 				}
@@ -395,7 +395,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 					}else{
 						// è la prima volta far comparire lo schermo che dice TACHICARDIA
 						measure->dangerShowing = 0;
-						//showDangerTachicardia();
+						showDangerTachicardia();
 					}
 				}
 				// 0-1-1
@@ -408,7 +408,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 					else{
 						// è la prima volta e quindi far comparire ARITMIA
 						measure->dangerShowing = 0;
-						//showDangerAritmia();
+						showDangerAritmia();
 					}
 
 				}
@@ -420,7 +420,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 						showMeasures();
 					}else{
 						measure->dangerShowing = 0;
-						//showDangerFebbre();
+						showDangerFebbre();
 					}
 
 				}
@@ -433,7 +433,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 					}
 					else{
 						measure->dangerShowing = 0;
-						//showDangerCovid();
+						showDangerCovid();
 					}
 
 				}
@@ -447,7 +447,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 					else{
 						// è la prima volta e quindi far comparire FEBBRE ALTA
 						measure->dangerShowing = 0;
-						//showDangerFebbreAlta();
+						showDangerFebbreAlta();
 					}
 
 				}
@@ -461,7 +461,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 					else{
 						// è la prima volta e quindi far comparire FEBBRE MOLTO ALTA
 						measure->dangerShowing = 0;
-						//showDangerFebbreMoltoAlta();
+						showDangerFebbreMoltoAlta();
 					}
 				}
 			}

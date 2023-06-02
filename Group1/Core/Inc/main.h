@@ -128,13 +128,7 @@ typedef struct{
 	float averageValueTemp;
 	uint32_t averageValueHeartRate;
 	uint32_t averageValueOxygen;
-	// value
-	float valueTemperature;
 }Measure;
-
-//typedef struct{
-//	MAX32664 max;
-//}Sensor;
 
 
 Flag* getFlag(void);
