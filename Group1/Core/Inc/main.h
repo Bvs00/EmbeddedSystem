@@ -63,8 +63,8 @@ void Error_Handler(void);
 #define MFIO_GPIO_Port GPIOC
 #define Temperature_Pin GPIO_PIN_0
 #define Temperature_GPIO_Port GPIOA
-#define RelaxLed_Pin GPIO_PIN_0
-#define RelaxLed_GPIO_Port GPIOB
+#define RelaxedLed_Pin GPIO_PIN_8
+#define RelaxedLed_GPIO_Port GPIOA
 #define SCL_Pin GPIO_PIN_6
 #define SCL_GPIO_Port GPIOB
 #define SDA_Pin GPIO_PIN_7
@@ -80,7 +80,7 @@ enum Threshould{
 	countFail = 5,
 	highTemperature = 37,
 	highHeartRate = 120,
-	lowOxygen = 97,
+	lowOxygen = 96,
 	// confidence range
 	lowConfTemp = 20,
 	highConfTemp = 45,
@@ -88,6 +88,16 @@ enum Threshould{
 	highConfHeartRate = 220,
 	lowConfOxygen = 95,
 	highConfOxygen = 101
+};
+
+enum animationDuration{ //all are indicate in ms, convert them as necessary
+	showDangerDuration = 2000,
+	tim10Duration = 1000,
+	tim11Duration = 1,
+	intervallLed = 1000,
+	timeOffOnComplete = 20,
+	timeInspirationOrEspriration = 4500,
+	intervallBuzzer = 200
 };
 
 typedef struct{
@@ -102,7 +112,8 @@ typedef struct{
 	uint32_t goodTemp;
 	uint32_t goodHeartRate;
 	uint32_t goodOxygen;
-	// count per il Led e Buzzer
+	// count per il Led e Buzzer e showingTime
+	uint32_t dangerShowing;
 	uint32_t ledCounter;
 	uint32_t noteCount;
 	// count per avviso posizionamento dita
@@ -110,13 +121,15 @@ typedef struct{
 	uint32_t badValueHeartRate;
 	uint32_t badValueOxygen;
 	// cumulative
-	uint32_t sumTemp;
+	float sumTemp;
 	uint32_t sumHeartRate;
 	uint32_t sumOxygen;
 	// Average Value
-	uint32_t averageValueTemp;
+	float averageValueTemp;
 	uint32_t averageValueHeartRate;
 	uint32_t averageValueOxygen;
+	// value
+	float valueTemperature;
 }Measure;
 
 //typedef struct{
@@ -126,7 +139,9 @@ typedef struct{
 
 Flag* getFlag(void);
 Measure* getMeasure(void);
-//Sensor* getSensor(void);
+
+void FLAG_Init(void);
+void MEASURE_Init(void);
 
 /* USER CODE END Private defines */
 
