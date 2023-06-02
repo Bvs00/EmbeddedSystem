@@ -119,3 +119,14 @@ void showDangerFebbreMoltoAlta(){
 	ssd1306_Fill(White);
 	ssd1306_UpdateScreen();
 }
+
+void showReplaceFinger(void){
+	ssd1306_Fill(Black);
+	ssd1306_SetCursor(20, 10);
+	ssd1306_WriteString("Please replace", Font_7x10, White);
+	ssd1306_SetCursor(50, 25);
+	ssd1306_WriteString("Finger", Font_7x10, White);
+	ssd1306_UpdateScreen();
+}
+
+

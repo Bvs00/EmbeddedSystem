@@ -75,8 +75,8 @@ void Error_Handler(void);
 // We define the all treshould
 enum Threshould{
 	// alert tresholds
-	goodMeasureTime = 10,
-	goodNumberMeasure = 6,
+	goodMeasureTime = 6,
+	goodNumberMeasure = 4,
 	countFail = 5,
 	highTemperature = 37,
 	highHeartRate = 120,
@@ -136,6 +136,8 @@ Measure* getMeasure(void);
 
 void FLAG_Init(void);
 void MEASURE_Init(void);
+void resetValue(void);
+void resetAllValue(void);
 
 /* USER CODE END Private defines */
 

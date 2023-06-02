@@ -75,6 +75,22 @@ void MEASURE_Init(void){
 	measure->sumTemp = 0;
 }
 
+void resetValue(void){
+	Measure* measure = getMeasure();
+	measure->sumHeartRate = 0;
+	measure->sumOxygen = 0;
+	measure->sumTemp = 0;
+	measure->goodHeartRate = 0;
+	measure->goodOxygen = 0;
+	measure->goodTemp = 0;
+}
+
+void resetAllValue(void){
+	Measure* measure = getMeasure();
+	measure->averageValueHeartRate = 0;
+	measure->averageValueOxygen = 0;
+	measure->averageValueTemp = 0;
+}
 
 /* USER CODE END PTD */
 
@@ -263,20 +279,20 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 		// attivo il sensore MAX32664
 		read_sensor(max);
-		if(max->algorithm_state == 3){
+//		if(max->algorithm_state == 3){
 
-			uint32_t heartRate = max->heart_rate;
-			uint32_t oxygen = max->oxygen;
+		uint32_t heartRate = max->heart_rate;
+		uint32_t oxygen = max->oxygen;
 
-			if ((heartRate < highConfHeartRate) && (heartRate > lowConfHeartRate)){
-				measure->sumHeartRate += heartRate;
-				measure->goodHeartRate++;
-			}
-			if ((oxygen < highConfOxygen) && (oxygen > lowConfOxygen)){
-				measure->sumOxygen += oxygen;
-				measure->goodOxygen++;
-			}
+		if ((heartRate < highConfHeartRate) && (heartRate > lowConfHeartRate)){
+			measure->sumHeartRate += heartRate;
+			measure->goodHeartRate++;
 		}
+		if ((oxygen < highConfOxygen) && (oxygen > lowConfOxygen)){
+			measure->sumOxygen += oxygen;
+			measure->goodOxygen++;
+		}
+//		}
 
 		// BASTARDATA DEL SECOLO MI VEDO I VALORI CHE HO
 
@@ -284,10 +300,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		sprintf(valueTmp, "Temperatura: %.2f\n\r", temperature);
 		HAL_UART_Transmit(&huart2,valueTmp , strlen(valueTmp), HAL_MAX_DELAY);
 
-		sprintf(valueHeart, "HeartRate: %d\n\r", max->heart_rate);
+		sprintf(valueHeart, "HeartRate: %d\n\r", heartRate);
 		HAL_UART_Transmit(&huart2,valueHeart , strlen(valueHeart), HAL_MAX_DELAY);
 
-		sprintf(valueOxygen, "Oxygen: %d\n\r", max->oxygen);
+		sprintf(valueOxygen, "Oxygen: %d\n\r", oxygen);
 		HAL_UART_Transmit(&huart2,valueOxygen , strlen(valueOxygen), HAL_MAX_DELAY);
 
 
@@ -297,13 +313,15 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		// In questa fase attivo le flag e solo qui dentro mostro le azioni
 
 		if (measure->countTot >= goodMeasureTime){  // se ho effettuato le misurazioni per tempo = a goodMeasureTime
-
 			// controllo se le misurazioni del tempo possono essere valutate
-			//			measure->countTot = 0;
+
+			char str[] = "Nuova misura disponibile\r\n";
+			HAL_UART_Transmit(&huart2, str, strlen(str), HAL_MAX_DELAY);
 
 			measure->countTot = 0;
 
 			if (measure->goodTemp >= goodNumberMeasure){
+
 				measure->badValueTemp = 0;
 
 				previousValueTemp = measure->averageValueTemp;
@@ -315,10 +333,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 			}else{
 				measure->badValueTemp++;
+				measure->averageValueTemp = 0;
 			}
 
 			// controllo se le misurazioni del battito cardiaco possono essere valutate
 			if (measure->goodHeartRate >= goodNumberMeasure){
+
 				measure->badValueHeartRate = 0;
 
 				previousValueHeartRate = measure->averageValueHeartRate;
@@ -329,10 +349,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 			}else{
 				measure->badValueHeartRate++;
+				measure->averageValueHeartRate = 0;
 			}
 
 			// controllo se le misurazioni dell'ossigenazione possono essere valutate
 			if (measure->goodOxygen >= goodNumberMeasure){
+
 				measure->badValueOxygen = 0;
 
 				previousValueOxygen = measure->averageValueOxygen;
@@ -343,24 +365,18 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 
 			}else{
 				measure->badValueOxygen++;
+				measure->averageValueOxygen = 0;
 			}
 
-
-
-
+			resetValue();
 		}
 
 
 		// controllo se i badValue sono pari a countFail per far in modo che compaia una schermata di riposizionamento dito
 		if ((measure->badValueHeartRate >= countFail) || (measure->badValueOxygen >= countFail) || (measure->badValueTemp >= countFail)){
 			// devo mostrare la schermata di posizionamento dito
-			ssd1306_Fill(Black);
-			ssd1306_SetCursor(20, 10);
-			ssd1306_WriteString("Please replace", Font_7x10, White);
-			ssd1306_SetCursor(50, 25);
-			ssd1306_WriteString("Finger", Font_7x10, White);
-			ssd1306_UpdateScreen();
-
+			showReplaceFinger();
+			resetAllValue();
 		}else{
 
 			if((measure->dangerShowing * tim10Duration) < showDangerDuration){ //Lascio attiva la schermata di allert

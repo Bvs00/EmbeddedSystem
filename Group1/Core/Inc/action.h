@@ -27,3 +27,5 @@ void showDangerCovid(void);
 void showDangerFebbreAlta(void);
 
 void showDangerFebbreMoltoAlta(void);
+
+void showReplaceFinger(void);
