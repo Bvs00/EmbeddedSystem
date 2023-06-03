@@ -73,7 +73,7 @@ typedef struct {
 	uint32_t infrared_led;
 	uint32_t red_led;
 	uint16_t heart_rate;
-	uint8_t confidence;
+	uint8_t confidence_heart_rate;
 	uint16_t oxygen;
 	uint8_t status;
 	uint8_t algorithm_status;

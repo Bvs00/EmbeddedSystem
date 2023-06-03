@@ -79,31 +79,32 @@ enum Threshould{
 	goodNumberMeasure = 4,
 	countFail = 5,
 	highTemperature = 37,
-	highHeartRate = 120,
-	lowOxygen = 96,
+	highHeartRate = 60,	// 120
+	lowOxygen = 100,	// 96
 	// confidence range
 	lowConfTemp = 20,
 	highConfTemp = 45,
 	lowConfHeartRate = 50,
 	highConfHeartRate = 220,
 	lowConfOxygen = 95,
-	highConfOxygen = 101
+	highConfOxygen = 101,
+	acceptableConfidenceHeartRate = 95
 };
 
 enum animationDuration{ //all are indicate in ms, convert them as necessary
-	showDangerDuration = 2000,
-	tim10Duration = 1000,
-	tim11Duration = 1,
+	showDangerDuration = 2,
 	intervallLed = 1000,
 	timeOffOnComplete = 20,
 	timeInspirationOrEspriration = 4500,
-	intervallBuzzer = 200
+	intervallBuzzer = 200,
+
 };
 
 typedef struct{
 	bool highTemperatureFlag;
 	bool highHeartRateFlag;
 	bool lowOxygenFlag;
+	bool dangerShowing;
 }Flag;
 
 typedef struct{
@@ -113,7 +114,7 @@ typedef struct{
 	uint32_t goodHeartRate;
 	uint32_t goodOxygen;
 	// count per il Led e Buzzer e showingTime
-	uint32_t dangerShowing;
+	uint32_t countDangerShowing;
 	uint32_t ledCounter;
 	uint32_t noteCount;
 	// count per avviso posizionamento dita
@@ -137,7 +138,7 @@ Measure* getMeasure(void);
 void FLAG_Init(void);
 void MEASURE_Init(void);
 void resetValue(void);
-void resetAllValue(void);
+void resetAvgValue(void);
 
 /* USER CODE END Private defines */
 

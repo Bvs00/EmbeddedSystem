@@ -1,12 +1,13 @@
-
 #include "MAX32664.h"
 
-
+/*
+ * This function return the pointer to MAX32664 Structure
+ * We declare only once.
+ */
 MAX32664* getSensor(void){
 	static MAX32664 max;
 	return &max;
 }
-
 
 /*
  * This function allows to change the mode of the MFIO pin of the MAX32664 from an output pin to an input pin
@@ -39,7 +40,7 @@ uint8_t begin(MAX32664* sensor,I2C_HandleTypeDef *i2c_port, GPIO_TypeDef* reset_
 	sensor->infrared_led = -1;
 	sensor->red_led = -1;
 	sensor->heart_rate = -1;
-	sensor->confidence = -1;
+	sensor->confidence_heart_rate = -1;
 	sensor->oxygen = -1;
 	sensor->status = -1;
 	sensor->algorithm_state = -1;
@@ -105,7 +106,7 @@ uint8_t write(MAX32664 *max32664, uint8_t family_byte, uint8_t index_byte, uint8
 /*
  * The write function allows to write in the specific memory location, the necessary command.
  * This function is needed to enable the MAX30101 sensor and to enable the algorithm that compute the necessary values
- * to read the blood oxygenation nad heart beat of the patient.
+ * to read the blood oxygenation and heart beat of the patient.
  * After the operation is executed, it is necessary to read the status of the MAX32664 to check if the command
  * was executed correctly.
  */
@@ -350,8 +351,8 @@ uint8_t read_sensor(MAX32664 *max32664){
 	max32664->heart_rate |= (samples[14]);
 	max32664->heart_rate /= 10;
 
-	/* confidence */
-	max32664->confidence =(uint8_t) samples[15];
+	/* confidence only for Heart Rate*/
+	max32664->confidence_heart_rate =(uint8_t) samples[15];
 
 	/* oxygen */
 	max32664->oxygen = (uint16_t)(samples[16] <<8);

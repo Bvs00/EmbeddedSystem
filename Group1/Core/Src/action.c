@@ -62,15 +62,15 @@ void showMeasures(){
 	ssd1306_DrawBitmap(0, 44, oxygenPic, 20, 20, White);
 
 	ssd1306_SetCursor(30, 5);
-	sprintf(print, "%.2f Celsius", measures->averageValueTemp);
+	compositeString(print,TEMPERATURE_MODE);
 	ssd1306_WriteString(print, Font_7x10, White);
 
 	ssd1306_SetCursor(30, 26);
-	sprintf(print, "%d BPM", measures->averageValueHeartRate);
+	compositeString(print,HEART_RATE_MODE);
 	ssd1306_WriteString(print, Font_7x10, White);
 
 	ssd1306_SetCursor(30, 48);
-	sprintf(print, "%d ", measures->averageValueOxygen);
+	compositeString(print,OXYGEN_MODE);
 	ssd1306_WriteString(print, Font_7x10, White);
 
 	if (flags->highTemperatureFlag){
@@ -86,38 +86,66 @@ void showMeasures(){
 }
 
 void showDangerIpossimeia(){
-	ssd1306_Fill(White);
-	ssd1306_UpdateScreen();
+    ssd1306_Fill(Black);
+    ssd1306_SetCursor(0, 0);
+    ssd1306_WriteString("Warning", Font_11x18, White);
+    ssd1306_SetCursor(0, 30);
+    ssd1306_WriteString("Ipossimeia", Font_11x18, White);
+    ssd1306_UpdateScreen();
 }
 
 void showDangerTachicardia(){
-	ssd1306_Fill(White);
-	ssd1306_UpdateScreen();
+    ssd1306_Fill(Black);
+    ssd1306_SetCursor(0, 0);
+    ssd1306_WriteString("Warning", Font_11x18, White);
+    ssd1306_SetCursor(0, 30);
+    ssd1306_WriteString("Tachycardia", Font_11x18, White);
+    ssd1306_UpdateScreen();
 }
 
 void showDangerAritmia(){
-	ssd1306_Fill(White);
-	ssd1306_UpdateScreen();
+    ssd1306_Fill(Black);
+    ssd1306_SetCursor(0, 0);
+    ssd1306_WriteString("Warning", Font_11x18, White);
+    ssd1306_SetCursor(0, 30);
+    ssd1306_WriteString("Aritmia", Font_11x18, White);
+    ssd1306_UpdateScreen();
 }
 
 void showDangerFebbre(){
-	ssd1306_Fill(White);
-	ssd1306_UpdateScreen();
+    ssd1306_Fill(Black);
+    ssd1306_SetCursor(0, 0);
+    ssd1306_WriteString("Warning", Font_11x18, White);
+    ssd1306_SetCursor(0, 30);
+    ssd1306_WriteString("Febbre", Font_11x18, White);
+    ssd1306_UpdateScreen();
 }
 
 void showDangerCovid(){
-	ssd1306_Fill(White);
-	ssd1306_UpdateScreen();
+    ssd1306_Fill(Black);
+    ssd1306_SetCursor(0, 0);
+    ssd1306_WriteString("Warning", Font_11x18, White);
+    ssd1306_SetCursor(0, 30);
+    ssd1306_WriteString("Covid", Font_11x18, White);
+    ssd1306_UpdateScreen();
 }
 
 void showDangerFebbreAlta(){
-	ssd1306_Fill(White);
-	ssd1306_UpdateScreen();
+    ssd1306_Fill(Black);
+    ssd1306_SetCursor(0, 0);
+    ssd1306_WriteString("Warning", Font_11x18, White);
+    ssd1306_SetCursor(0, 30);
+    ssd1306_WriteString("FebbreAlta", Font_11x18, White);
+    ssd1306_UpdateScreen();
 }
 
 void showDangerFebbreMoltoAlta(){
-	ssd1306_Fill(White);
-	ssd1306_UpdateScreen();
+    ssd1306_Fill(Black);
+    ssd1306_SetCursor(0, 0);
+    ssd1306_WriteString("Warning", Font_11x18, White);
+    ssd1306_SetCursor(0, 30);
+    ssd1306_WriteString("FebbreMoltoAlta", Font_11x18, White);
+    ssd1306_UpdateScreen();
 }
 
 void showReplaceFinger(void){
@@ -127,6 +155,31 @@ void showReplaceFinger(void){
 	ssd1306_SetCursor(50, 25);
 	ssd1306_WriteString("Finger", Font_7x10, White);
 	ssd1306_UpdateScreen();
+}
+
+void compositeString(char* print, uint8_t mode){
+	Measure* measures = getMeasure();
+
+	if (mode == TEMPERATURE_MODE){
+		if (measures->averageValueTemp != 0.0)
+			sprintf(print, "%.2f C", measures->averageValueTemp);
+		else
+			strcpy(print, "- C");
+
+	}
+	else if (mode == HEART_RATE_MODE){
+		if (measures->averageValueHeartRate != 0)
+			sprintf(print, "%d BPM", measures->averageValueHeartRate);
+		else
+			strcpy(print, "- BPM");
+
+	}else if (mode == OXYGEN_MODE){
+		if (measures->averageValueOxygen != 0)
+			sprintf(print, "%d%%", measures->averageValueOxygen);
+		else
+			strcpy(print, "- %");
+	}
+
 }
 
 
