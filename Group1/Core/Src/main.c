@@ -277,8 +277,9 @@ void SystemClock_Config(void)
  * I take into account each measure done for the complete measure.
  */
 
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
-{
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
+
+	// Basic Timer 10 is the timer that allow the new measurement
 	if (htim->Instance == TIM10){
 
 		Flag* flags = getFlag();
