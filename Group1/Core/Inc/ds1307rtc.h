@@ -27,6 +27,7 @@ int8_t ds1307rtc_get_date_time(DateTime* datetime);
 
 int8_t ds1307rtc_set_date_time(const DateTime* datetime);
 
+void ds1307rtc_start();
 
 
 

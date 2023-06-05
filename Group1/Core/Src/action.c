@@ -52,7 +52,6 @@ void computeAverageOxygen(void){
 
 
 void showMeasures(){
-	Measure* measures = getMeasure();
 	Flag* flags = getFlag();
 	char print[20];
 
@@ -86,66 +85,82 @@ void showMeasures(){
 }
 
 void showDangerIpossimeia(){
-    ssd1306_Fill(Black);
-    ssd1306_SetCursor(0, 0);
-    ssd1306_WriteString("Warning", Font_11x18, White);
-    ssd1306_SetCursor(0, 30);
-    ssd1306_WriteString("Ipossimeia", Font_11x18, White);
-    ssd1306_UpdateScreen();
+	ssd1306_Fill(Black);
+	ssd1306_SetCursor(20, 15);
+	ssd1306_WriteString("Oxigen level", Font_7x10, White);
+	ssd1306_SetCursor(17, 30);
+	ssd1306_WriteString("in your blood", Font_7x10, White);
+	ssd1306_SetCursor(37, 45);
+	ssd1306_WriteString("are low", Font_7x10, White);
+	ssd1306_UpdateScreen();
 }
 
 void showDangerTachicardia(){
-    ssd1306_Fill(Black);
-    ssd1306_SetCursor(0, 0);
-    ssd1306_WriteString("Warning", Font_11x18, White);
-    ssd1306_SetCursor(0, 30);
-    ssd1306_WriteString("Tachycardia", Font_11x18, White);
-    ssd1306_UpdateScreen();
+	ssd1306_Fill(Black);
+	ssd1306_SetCursor(12, 15);
+	ssd1306_WriteString("Your heart rate", Font_7x10, White);
+	ssd1306_SetCursor(40, 30);
+	ssd1306_WriteString("is very", Font_7x10, White);
+	ssd1306_SetCursor(50, 45);
+	ssd1306_WriteString("high", Font_7x10, White);
+	ssd1306_UpdateScreen();
 }
 
 void showDangerAritmia(){
-    ssd1306_Fill(Black);
-    ssd1306_SetCursor(0, 0);
-    ssd1306_WriteString("Warning", Font_11x18, White);
-    ssd1306_SetCursor(0, 30);
-    ssd1306_WriteString("Aritmia", Font_11x18, White);
-    ssd1306_UpdateScreen();
+	ssd1306_Fill(Black);
+	ssd1306_SetCursor(20, 5);
+	ssd1306_WriteString("Oxigen Level", Font_7x10, White);
+	ssd1306_SetCursor(50, 20);
+	ssd1306_WriteString("and", Font_7x10, White);
+	ssd1306_SetCursor(25, 35);
+	ssd1306_WriteString("Heart Rate", Font_7x10, White);
+	ssd1306_SetCursor(20, 50);
+	ssd1306_WriteString("are critical", Font_7x10, White);
+	ssd1306_UpdateScreen();
 }
 
 void showDangerFebbre(){
-    ssd1306_Fill(Black);
-    ssd1306_SetCursor(0, 0);
-    ssd1306_WriteString("Warning", Font_11x18, White);
-    ssd1306_SetCursor(0, 30);
-    ssd1306_WriteString("Febbre", Font_11x18, White);
-    ssd1306_UpdateScreen();
+	ssd1306_Fill(Black);
+	ssd1306_SetCursor(7, 15);
+	ssd1306_WriteString("Body temperature", Font_7x10, White);
+	ssd1306_SetCursor(20, 30);
+	ssd1306_WriteString("is very high", Font_7x10, White);
+	ssd1306_SetCursor(15, 45);
+	ssd1306_WriteString("probably fever", Font_7x10, White);
+	ssd1306_UpdateScreen();
 }
 
 void showDangerCovid(){
-    ssd1306_Fill(Black);
-    ssd1306_SetCursor(0, 0);
-    ssd1306_WriteString("Warning", Font_11x18, White);
-    ssd1306_SetCursor(0, 30);
-    ssd1306_WriteString("Covid", Font_11x18, White);
-    ssd1306_UpdateScreen();
+	ssd1306_Fill(Black);
+	ssd1306_SetCursor(28, 15);
+	ssd1306_WriteString("Your value", Font_7x10, White);
+	ssd1306_SetCursor(40, 30);
+	ssd1306_WriteString("predict", Font_7x10, White);
+	ssd1306_SetCursor(46, 45);
+	ssd1306_WriteString("covid", Font_7x10, White);
+	ssd1306_UpdateScreen();
 }
 
 void showDangerFebbreAlta(){
-    ssd1306_Fill(Black);
-    ssd1306_SetCursor(0, 0);
-    ssd1306_WriteString("Warning", Font_11x18, White);
-    ssd1306_SetCursor(0, 30);
-    ssd1306_WriteString("FebbreAlta", Font_11x18, White);
-    ssd1306_UpdateScreen();
+	ssd1306_Fill(Black);
+	ssd1306_SetCursor(28, 15);
+	ssd1306_WriteString("Your value", Font_7x10, White);
+	ssd1306_SetCursor(40, 30);
+	ssd1306_WriteString("predict", Font_7x10, White);
+	ssd1306_SetCursor(27, 45);
+	ssd1306_WriteString("high fever", Font_7x10, White);
+	ssd1306_UpdateScreen();
 }
 
 void showDangerFebbreMoltoAlta(){
-    ssd1306_Fill(Black);
-    ssd1306_SetCursor(0, 0);
-    ssd1306_WriteString("Warning", Font_11x18, White);
-    ssd1306_SetCursor(0, 30);
-    ssd1306_WriteString("FebbreMoltoAlta", Font_11x18, White);
-    ssd1306_UpdateScreen();
+	ssd1306_Fill(Black);
+	ssd1306_SetCursor(28, 15);
+	ssd1306_WriteString("Your value", Font_7x10, White);
+	ssd1306_SetCursor(20, 30);
+	ssd1306_WriteString("predict very", Font_7x10, White);
+	ssd1306_SetCursor(27, 45);
+	ssd1306_WriteString("high fever", Font_7x10, White);
+	ssd1306_UpdateScreen();
 }
 
 void showReplaceFinger(void){
@@ -207,6 +222,101 @@ void showTerminalTime(DateTime datetime){
 	HAL_UART_Transmit(&huart2, strDateTime, strlen(strDateTime), HAL_MAX_DELAY);
 }
 
+
+void showActionTachycardia(void){
+	Measure* measures = getMeasure();
+	Flag* flags = getFlag();
+
+	if ((measures->ledCounter < timeInhalationAndExhalation) && (flags->inhalation)){
+
+		__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, measures->ledCounter);
+
+		measures->ledCounter++;
+
+	}
+	if (measures->ledCounter == timeInhalationAndExhalation){
+		flags->exhalation = true;
+		flags->inhalation = false;
+		showExhalation();
+	}
+	if(measures->ledCounter == 0){
+		flags->exhalation = false;
+		flags->inhalation = true;
+		measures->repetition++;
+		showInhalation();
+	}
+	if((measures->ledCounter > 0) && (flags->exhalation)){
+
+		__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, measures->ledCounter);
+
+		measures->ledCounter--;
+
+	}
+}
+
+
+void showActionHypoxemia(void){
+
+}
+
+void showActionArrhythmia(void){
+
+}
+
+void showActionCovid(void);
+
+void showActionFever(void);
+
+void showActionHighFever(void);
+
+void showActionHighestFever(void);
+
+// show what do you do
+void showWhichAction(void){
+	Disease* diseases = getDisease();
+
+	if (diseases->tachycardia)
+		showWhichActionTachycardia();
+	else if(diseases->arrhythmia)
+		showWhichActionArrhythmia;
+	else if(diseases->covid)
+		showWhichActionCovid;
+	else if(diseases->fever)
+		showWhichActionFever;
+	else if(diseases->highFever)
+		showWhichActionHighFever;
+	else if(diseases->highestFever)
+		showWhichActionHighestFever;
+	else if(diseases->hypoxemia)
+		showWhichActionHypoxemia;
+
+}
+
+
+
+
+void showWhichActionTachycardia(void){
+	ssd1306_Fill(Black);
+	ssd1306_SetCursor(5, 15);
+	ssd1306_WriteString("I will now assist you", Font_7x10, White);
+	ssd1306_SetCursor(15, 30);
+	ssd1306_WriteString("in a breathing", Font_7x10, White);
+	ssd1306_SetCursor(35, 45);
+	ssd1306_WriteString("exercise", Font_7x10, White);
+	ssd1306_UpdateScreen();
+}
+
+void showWhichActionArrhythmia(void);
+
+void showWhichActionCovid(void);
+
+void showWhichActionFever(void);
+
+void showWhichActionHighFever(void);
+
+void showWhichActionHighestFever(void);
+
+void showWhichActionHypoxemia(void);
 
 
 

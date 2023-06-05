@@ -200,7 +200,10 @@ int main(void)
   MX_ADC1_Init();
   MX_TIM10_Init();
   MX_TIM11_Init();
+
   /* USER CODE BEGIN 2 */
+
+  // INIZIO
 
   HAL_TIM_OC_Start(&htim1, TIM_CHANNEL_1);  // Inizializzazione PWM canale 1
   HAL_TIM_OC_Start(&htim1, TIM_CHANNEL_2);  // Inizializzazione PWM canale 2
@@ -234,20 +237,11 @@ int main(void)
   MEASURE_Init();
   DISEASE_Init();
 
-  // DATETIME
-  DateTime datetime;
-
+  // Init and Start DS1307RTC
   ds1307rtc_init();
 
-  datetime.seconds=40;
-  datetime.minutes=04;
-  datetime.hours=17;
-  datetime.day=2;
-  datetime.year=23;
-  datetime.month=6;
-  datetime.date=5;
+  ds1307rtc_start();
 
-  ds1307rtc_set_date_time(&datetime);
 
 
 
@@ -256,6 +250,26 @@ int main(void)
 
   // Active the Oled_SSD1306
   showMeasures();
+
+//  showWhichActionTachycardia();
+
+//   showDangerIpossimeia();
+//
+//   HAL_Delay(3000);
+//
+//   showDangerTachicardia();
+//
+//   HAL_Delay(3000);
+//
+//   showDangerAritmia();
+//   HAL_Delay(3000);
+//   showDangerFebbre();
+//   HAL_Delay(3000);
+//   showDangerCovid();
+//   HAL_Delay(3000);
+//   showDangerFebbreAlta();
+//   HAL_Delay(3000);
+//   showDangerFebbreMoltoAlta();
 
   /* USER CODE END 2 */
 
@@ -611,17 +625,16 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 
 		if (flags->dangerShowing){
 			if (measures->countDangerShowing <= showDangerDuration){
+				if (measures->countDangerShowing == (showDangerDuration/2))
+					showWhichAction();
 
-				__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 2500+measures->countDangerShowing);
+				__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 2500);
 				measures->countDangerShowing++;
 
 			}else{
 				flags->dangerShowing = false;
-//				showInhalation();
 				measures->countDangerShowing = 0;
 				__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, measures->countDangerShowing);
-//				flags->exhalation = false;
-//				flags->inhalation = true;
 			}
 		}else if(diseases->arrhythmia && !flags->dangerShowing){
 
@@ -655,31 +668,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			diseases->hypoxemia = false;
 
 		}else if (diseases->tachycardia && !flags->dangerShowing && (measures->repetition <= repetitionBreathing)){
-			if ((measures->ledCounter < timeInhalationAndExhalation) && (flags->inhalation)){
 
-				__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, measures->ledCounter);
+			showActionTachycardia();
 
-				measures->ledCounter++;
-
-			}
-			if (measures->ledCounter == timeInhalationAndExhalation){
-				flags->exhalation = true;
-				flags->inhalation = false;
-				showExhalation();
-			}
-			if(measures->ledCounter == 0){
-				flags->exhalation = false;
-				flags->inhalation = true;
-				measures->repetition++;
-				showInhalation();
-			}
-			if((measures->ledCounter > 0) && (flags->exhalation)){
-
-				__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, measures->ledCounter);
-
-				measures->ledCounter--;
-
-			}
 		}else{
 			showMeasures();
 			measures->repetition = 0;

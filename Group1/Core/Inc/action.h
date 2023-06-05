@@ -2,6 +2,7 @@
 #include "ssd1306.h"
 #include "ds1307rtc.h"
 #include "usart.h"
+#include "tim.h"
 
 
 /*
@@ -47,10 +48,37 @@ void compositeString(char*, uint8_t);
 void showTerminalTime(DateTime datetime);
 
 // All action on Disease
+void showActionTachycardia(void);
 
-//void showFever(void);
-//
-//void show
+void showActionHypoxemia(void);
+
+void showActionArrhythmia(void);
+
+void showActionCovid(void);
+
+void showActionFever(void);
+
+void showActionHighFever(void);
+
+void showActionHighestFever(void);
+
+// show how to do
+void showWhichAction(void);
+
+void showWhichActionTachycardia(void);
+
+void showWhichActionTachycardia(void);
+
+void showWhichActionTachycardia(void);
+
+void showWhichActionTachycardia(void);
+
+void showWhichActionTachycardia(void);
+
+void showWhichActionTachycardia(void);
+
+void showWhichActionTachycardia(void);
+
 
 
 

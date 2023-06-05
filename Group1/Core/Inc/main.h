@@ -81,7 +81,7 @@ enum Threshould{
 	goodNumberMeasure = 4,
 	countFail = 5,
 	highTemperature = 37,
-	highHeartRate = 120,	// 120
+	highHeartRate = 60,	// 120
 	lowOxygen = 96,	// 96
 	// confidence range
 	lowConfTemp = 20,
@@ -94,7 +94,7 @@ enum Threshould{
 };
 
 enum animationDuration{ //all are indicate in ms, convert them as necessary
-	showDangerDuration = 3000,
+	showDangerDuration = 6000,	// must be a odd value
 	timeInhalationAndExhalation = 5000,
 	repetitionBreathing = 5
 };
@@ -108,7 +108,6 @@ typedef struct{
 	bool exhalation;
 }Flag;
 
-// Struttura per tutte le malattie
 typedef struct{
 	bool tachycardia;
 	bool hypoxemia;
