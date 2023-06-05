@@ -239,9 +239,9 @@ int main(void)
 
   ds1307rtc_init();
 
-  datetime.seconds=0;
-  datetime.minutes=51;
-  datetime.hours=11;
+  datetime.seconds=40;
+  datetime.minutes=04;
+  datetime.hours=17;
   datetime.day=2;
   datetime.year=23;
   datetime.month=6;
@@ -329,7 +329,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		Disease* diseases = getDisease();
 		MAX32664* max = getSensor();
 		DateTime datetime;
-		char strDateTime[50];
 
 		float temperature;
 		uint32_t previousValueTemp, previousValueHeartRate, previousValueOxygen;
@@ -463,12 +462,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			// 0-0-0
 			if (!flags->highTemperatureFlag && !flags->highHeartRateFlag && !flags->lowOxygenFlag){
 				// TUTTO BENE
-
-				ds1307rtc_get_date_time(&datetime);
-
-				sprintf(strDateTime,"La misura è stata fatta: %d/%d/%d - %d:%d:%d\n\r", datetime.date, datetime.month, datetime.year, datetime.hours, datetime.minutes, datetime.seconds);
-				HAL_UART_Transmit(&huart2, strDateTime, strlen(strDateTime), HAL_MAX_DELAY);
-
+				showTerminalTime(datetime);
 				showMeasures();
 			}
 			// 0-0-1
@@ -476,9 +470,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				// IPOSSIEMIA
 				// check that isn't a first time
 				if(previousValueOxygen < lowOxygen){ // if isn't a first time, I don't show the danger screen
-
+					showTerminalTime(datetime);
 					showMeasures();
-
 				}else{
 					// show the danger screen (IPOSSIEMIA)
 					flags->dangerShowing = true;
@@ -495,9 +488,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				// TACHICARDIA
 				// check that isn't a first time
 				if(previousValueHeartRate > highHeartRate){ // if isn't a first time, I don't show the danger screen
-
+					showTerminalTime(datetime);
 					showMeasures();
-
 				}else{
 					// show the danger screen (TACHICARDIA)
 					flags->dangerShowing = true;
@@ -513,7 +505,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				// ARITMIA
 				// check that isn't a first time
 				if ((previousValueHeartRate > highHeartRate) && (previousValueOxygen < lowOxygen)){  // if isn't a first time, I don't show the danger screen
-
+					showTerminalTime(datetime);
 					showMeasures();
 
 				}
@@ -532,7 +524,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				// FEBBRE
 				// check that isn't a first time
 				if(previousValueTemp > highTemperature){   // if isn't a first time, I don't show the danger screen
-
+					showTerminalTime(datetime);
 					showMeasures();
 
 				}else{
@@ -550,7 +542,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				// COVID
 				// check that isn't a first time
 				if ((previousValueTemp > highTemperature) && (previousValueOxygen < lowOxygen)){	// if isn't a first time, I don't show the danger screen
-
+					showTerminalTime(datetime);
 					showMeasures();
 
 				}
@@ -569,7 +561,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				// FEBBRE ALTA
 				// check that isn't a first time
 				if ((previousValueTemp > highTemperature) && (previousValueHeartRate > highHeartRate)){		// if isn't a first time, I don't show the danger screen
-
+					showTerminalTime(datetime);
 					showMeasures();
 
 				}
@@ -588,7 +580,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				// FEBBRE MOLTO ALTA
 				// check that isn't a first time
 				if ((previousValueTemp > highTemperature) && (previousValueHeartRate > highHeartRate) && (previousValueOxygen < lowOxygen)){	// if isn't a first time, I don't show the danger screen
-
+					showTerminalTime(datetime);
 					showMeasures();
 
 				}
@@ -625,35 +617,42 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 
 			}else{
 				flags->dangerShowing = false;
-				showInhalation();
+//				showInhalation();
 				measures->countDangerShowing = 0;
 				__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, measures->countDangerShowing);
-				flags->exhalation = false;
-				flags->inhalation = true;
+//				flags->exhalation = false;
+//				flags->inhalation = true;
 			}
 		}else if(diseases->arrhythmia && !flags->dangerShowing){
 
 			// mostra azione per aritmia
+			diseases->arrhythmia = false;
+
 
 		}else if(diseases->covid && !flags->dangerShowing){
 
 			// mostra azione per covid
+			diseases->covid = false;
 
 		}else if(diseases->fever && !flags->dangerShowing){
 
 			// mostra azione per fever
+			diseases->fever = false;
 
 		}else if(diseases->highFever && !flags->dangerShowing){
 
 			// mostra azione per high fever
+			diseases->highFever = false;
 
 		}else if(diseases->highestFever && !flags->dangerShowing){
 
 			// mostra azione per highest fever
+			diseases->highestFever = false;
 
 		}else if(diseases->hypoxemia && !flags->dangerShowing){
 
 			// mostra azione per ipossiemia
+			diseases->hypoxemia = false;
 
 		}else if (diseases->tachycardia && !flags->dangerShowing && (measures->repetition <= repetitionBreathing)){
 			if ((measures->ledCounter < timeInhalationAndExhalation) && (flags->inhalation)){

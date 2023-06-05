@@ -1,5 +1,7 @@
 #include "main.h"
 #include "ssd1306.h"
+#include "ds1307rtc.h"
+#include "usart.h"
 
 
 /*
@@ -41,3 +43,17 @@ void showInhalation(void);
 void showExhalation(void);
 
 void compositeString(char*, uint8_t);
+
+void showTerminalTime(DateTime datetime);
+
+// All action on Disease
+
+//void showFever(void);
+//
+//void show
+
+
+
+
+
+

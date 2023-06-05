@@ -108,6 +108,7 @@ typedef struct{
 	bool exhalation;
 }Flag;
 
+// Struttura per tutte le malattie
 typedef struct{
 	bool tachycardia;
 	bool hypoxemia;

@@ -150,10 +150,10 @@ void showDangerFebbreMoltoAlta(){
 
 void showReplaceFinger(void){
 	ssd1306_Fill(Black);
-	ssd1306_SetCursor(20, 10);
+	ssd1306_SetCursor(20, 20);
 	ssd1306_WriteString("Please replace", Font_7x10, White);
-	ssd1306_SetCursor(50, 25);
-	ssd1306_WriteString("Finger", Font_7x10, White);
+	ssd1306_SetCursor(45, 35);
+	ssd1306_WriteString("finger", Font_7x10, White);
 	ssd1306_UpdateScreen();
 }
 
@@ -199,5 +199,15 @@ void compositeString(char* print, uint8_t mode){
 	}
 
 }
+
+void showTerminalTime(DateTime datetime){
+	char strDateTime[50];
+	ds1307rtc_get_date_time(&datetime);
+	sprintf(strDateTime,"La misura è stata fatta: %d/%d/%d - %d:%d:%d\n\r", datetime.date, datetime.month, datetime.year, datetime.hours, datetime.minutes, datetime.seconds);
+	HAL_UART_Transmit(&huart2, strDateTime, strlen(strDateTime), HAL_MAX_DELAY);
+}
+
+
+
 
 
