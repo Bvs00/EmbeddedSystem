@@ -31,6 +31,7 @@
 #include "action.h"
 #include "MAX32664.h"
 #include "ssd1306.h"
+#include "ds1307rtc.h"
 #include "stdio.h"
 /* USER CODE END Includes */
 
@@ -233,6 +234,23 @@ int main(void)
   MEASURE_Init();
   DISEASE_Init();
 
+  // DATETIME
+  DateTime datetime;
+
+  ds1307rtc_init();
+
+  datetime.seconds=0;
+  datetime.minutes=51;
+  datetime.hours=11;
+  datetime.day=2;
+  datetime.year=23;
+  datetime.month=6;
+  datetime.date=5;
+
+  ds1307rtc_set_date_time(&datetime);
+
+
+
   // Define the ADC conversion in PollingMode
   HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
 
@@ -310,283 +328,281 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		Measure* measure = getMeasure();
 		Disease* diseases = getDisease();
 		MAX32664* max = getSensor();
+		DateTime datetime;
+		char strDateTime[50];
+
 		float temperature;
 		uint32_t previousValueTemp, previousValueHeartRate, previousValueOxygen;
 
 		char valueTmp[20], valueHeart[20], valueOxygen[20];
 
-//		if (!flags->dangerShowing){
 
-			measure->countTot += 1;
+		measure->countTot += 1;
 
-			// Put the value of temperature in this variable, from the function 'getTemperature'
-			temperature = getTemperature();
-			// I check that the value of temperature is between a min value and a max value
-			// to don't take into account the out-of-bounds value for the mean.
-			if ((temperature< highConfTemp) && (temperature >lowConfTemp)){
-				measure->sumTemp += temperature;
-				measure->goodTemp++;
+		// Put the value of temperature in this variable, from the function 'getTemperature'
+		temperature = getTemperature();
+		// I check that the value of temperature is between a min value and a max value
+		// to don't take into account the out-of-bounds value for the mean.
+		if ((temperature< highConfTemp) && (temperature >lowConfTemp)){
+			measure->sumTemp += temperature;
+			measure->goodTemp++;
+		}
+
+		// Read value of MAX32664
+		read_sensor(max);
+
+		uint32_t heartRate = max->heart_rate;
+		uint32_t oxygen = max->oxygen;
+		uint32_t confidence_heart_rate = max->confidence_heart_rate;
+
+		// Check that the value of heart rate is acceptable
+		if ((heartRate < highConfHeartRate) && (heartRate > lowConfHeartRate) && (confidence_heart_rate > acceptableConfidenceHeartRate)){
+			measure->sumHeartRate += heartRate;
+			measure->goodHeartRate++;
+		}
+		// Check that the value of oxygen is acceptable
+		if ((oxygen < highConfOxygen) && (oxygen > lowConfOxygen)){
+			measure->sumOxygen += oxygen;
+			measure->goodOxygen++;
+		}
+
+		// BASTARDATA DEL SECOLO MI VEDO I VALORI CHE HO
+
+
+		sprintf(valueTmp, "Temperatura: %.2f\n\r", temperature);
+		HAL_UART_Transmit(&huart2,valueTmp , strlen(valueTmp), HAL_MAX_DELAY);
+
+		sprintf(valueHeart, "HeartRate: %d\n\r", heartRate);
+		HAL_UART_Transmit(&huart2,valueHeart , strlen(valueHeart), HAL_MAX_DELAY);
+
+		sprintf(valueOxygen, "Oxygen: %d\n\r", oxygen);
+		HAL_UART_Transmit(&huart2,valueOxygen , strlen(valueOxygen), HAL_MAX_DELAY);
+
+		sprintf(valueTmp, "COUNT: %d\r\n", measure->countTot);
+		HAL_UART_Transmit(&huart2, valueTmp, strlen(valueTmp), HAL_MAX_DELAY);
+
+
+		// I show the measure on the screen only when I reach the 'goodMeasureTime'
+		if (measure->countTot >= goodMeasureTime){
+
+			char str[] = "Nuova misura disponibile\r\n";
+			HAL_UART_Transmit(&huart2, str, strlen(str), HAL_MAX_DELAY);
+
+
+			// Check that the measures of temperature are enough
+			if (measure->goodTemp >= goodNumberMeasure){
+
+				measure->badValueTemp = 0;
+
+				previousValueTemp = measure->averageValueTemp;
+
+				computeAverageTemp();
+
+				// If my average value is over the threshold, set the flag = true
+				flags->highTemperatureFlag = (measure->averageValueTemp < highTemperature) ? false : true;
+
+			}else{
+				// If the measures is not enough, increment the counter for error measure and reset the average value
+				measure->badValueTemp++;
+				measure->averageValueTemp = 0;     // In this way on my screen I will show that the measure is wrong
+				flags->highTemperatureFlag = false;
 			}
 
-			// Read value of MAX32664
-			read_sensor(max);
+			// Check that the measures of heart rate are enough
+			if (measure->goodHeartRate >= goodNumberMeasure){
 
-			uint32_t heartRate = max->heart_rate;
-			uint32_t oxygen = max->oxygen;
-			uint32_t confidence_heart_rate = max->confidence_heart_rate;
+				measure->badValueHeartRate = 0;
 
-			// Check that the value of heart rate is acceptable
-			if ((heartRate < highConfHeartRate) && (heartRate > lowConfHeartRate) && (confidence_heart_rate > acceptableConfidenceHeartRate)){
-				measure->sumHeartRate += heartRate;
-				measure->goodHeartRate++;
-			}
-			// Check that the value of oxygen is acceptable
-			if ((oxygen < highConfOxygen) && (oxygen > lowConfOxygen)){
-				measure->sumOxygen += oxygen;
-				measure->goodOxygen++;
-			}
+				previousValueHeartRate = measure->averageValueHeartRate;
 
-			// BASTARDATA DEL SECOLO MI VEDO I VALORI CHE HO
+				computeAverageHeartRate();
 
+				// If my average value is over the threshold, set the flag = true
+				flags->highHeartRateFlag = (measure->averageValueHeartRate < highHeartRate) ? false : true;
 
-			sprintf(valueTmp, "Temperatura: %.2f\n\r", temperature);
-			HAL_UART_Transmit(&huart2,valueTmp , strlen(valueTmp), HAL_MAX_DELAY);
-
-			sprintf(valueHeart, "HeartRate: %d\n\r", heartRate);
-			HAL_UART_Transmit(&huart2,valueHeart , strlen(valueHeart), HAL_MAX_DELAY);
-
-			sprintf(valueOxygen, "Oxygen: %d\n\r", oxygen);
-			HAL_UART_Transmit(&huart2,valueOxygen , strlen(valueOxygen), HAL_MAX_DELAY);
-
-			sprintf(valueTmp, "COUNT: %d\r\n", measure->countTot);
-			HAL_UART_Transmit(&huart2, valueTmp, strlen(valueTmp), HAL_MAX_DELAY);
-
-
-			// I show the measure on the screen only when I reach the 'goodMeasureTime'
-			if (measure->countTot >= goodMeasureTime){
-
-				char str[] = "Nuova misura disponibile\r\n";
-				HAL_UART_Transmit(&huart2, str, strlen(str), HAL_MAX_DELAY);
-
-
-				// Check that the measures of temperature are enough
-				if (measure->goodTemp >= goodNumberMeasure){
-
-					measure->badValueTemp = 0;
-
-					previousValueTemp = measure->averageValueTemp;
-
-					computeAverageTemp();
-
-					// If my average value is over the threshold, set the flag = true
-					flags->highTemperatureFlag = (measure->averageValueTemp < highTemperature) ? false : true;
-
-				}else{
-					// If the measures is not enough, increment the counter for error measure and reset the average value
-					measure->badValueTemp++;
-					measure->averageValueTemp = 0;     // In this way on my screen I will show that the measure is wrong
-					flags->highTemperatureFlag = false;
-				}
-
-				// Check that the measures of heart rate are enough
-				if (measure->goodHeartRate >= goodNumberMeasure){
-
-					measure->badValueHeartRate = 0;
-
-					previousValueHeartRate = measure->averageValueHeartRate;
-
-					computeAverageHeartRate();
-
-					// If my average value is over the threshold, set the flag = true
-					flags->highHeartRateFlag = (measure->averageValueHeartRate < highHeartRate) ? false : true;
-
-				}else{
-					// If the measures is not enough, increment the counter for error measure and reset the average value
-					measure->badValueHeartRate++;
-					measure->averageValueHeartRate = 0;			// In this way on my screen I will show that the measure is wrong
-					flags->highHeartRateFlag = false;
-				}
-
-				// Check that the measures of oxygen are enough
-				if (measure->goodOxygen >= goodNumberMeasure){
-
-					measure->badValueOxygen = 0;
-
-					previousValueOxygen = measure->averageValueOxygen;
-
-					computeAverageOxygen();
-
-					// If my average value is over the threshold, set the flag = true
-					flags->lowOxygenFlag = (measure->averageValueOxygen < lowOxygen) ? true : false;
-
-				}else{
-					// If the measures is not enough, increment the counter for error measure and reset the average value
-					measure->badValueOxygen++;
-					measure->averageValueOxygen = 0;		// In this way on my screen I will show that the measure is wrong
-					flags->lowOxygenFlag = false;
-				}
-
-				resetValue();		// This line is important because for each measurement we initialize the value to compute the averages
+			}else{
+				// If the measures is not enough, increment the counter for error measure and reset the average value
+				measure->badValueHeartRate++;
+				measure->averageValueHeartRate = 0;			// In this way on my screen I will show that the measure is wrong
+				flags->highHeartRateFlag = false;
 			}
 
+			// Check that the measures of oxygen are enough
+			if (measure->goodOxygen >= goodNumberMeasure){
 
-			// I check that the count: 'badValue' for all measure (temperature, heart_rate and oxygen) is enough to show the error finger position
-			if (((measure->badValueHeartRate >= countFail) || (measure->badValueOxygen >= countFail) || (measure->badValueTemp >= countFail)) && (measure->countTot >= goodMeasureTime)){
-				showReplaceFinger();
-				resetAvgValue();		// This line is important because I must reset the avg value, otherwise I would still have these value
-				measure->countTot = 0;	// This line is important because I must set to 0 the counter else if I'm in this state,
-										//I will have a loop because compute always the avg values but I have only one value.
+				measure->badValueOxygen = 0;
 
-			}else if(measure->countTot >= goodMeasureTime){
-				// If the values are good I can show the averages value and I must check which flags are active
-				measure->countTot = 0;
-				// 0-0-0
-				if (!flags->highTemperatureFlag && !flags->highHeartRateFlag && !flags->lowOxygenFlag){
-					// TUTTO BENE
+				previousValueOxygen = measure->averageValueOxygen;
+
+				computeAverageOxygen();
+
+				// If my average value is over the threshold, set the flag = true
+				flags->lowOxygenFlag = (measure->averageValueOxygen < lowOxygen) ? true : false;
+
+			}else{
+				// If the measures is not enough, increment the counter for error measure and reset the average value
+				measure->badValueOxygen++;
+				measure->averageValueOxygen = 0;		// In this way on my screen I will show that the measure is wrong
+				flags->lowOxygenFlag = false;
+			}
+
+			resetValue();		// This line is important because for each measurement we initialize the value to compute the averages
+		}
+
+
+		// I check that the count: 'badValue' for all measure (temperature, heart_rate and oxygen) is enough to show the error finger position
+		if (((measure->badValueHeartRate >= countFail) || (measure->badValueOxygen >= countFail) || (measure->badValueTemp >= countFail)) && (measure->countTot >= goodMeasureTime)){
+			showReplaceFinger();
+			resetAvgValue();		// This line is important because I must reset the avg value, otherwise I would still have these value
+			measure->countTot = 0;	// This line is important because I must set to 0 the counter else if I'm in this state,
+			//I will have a loop because compute always the avg values but I have only one value.
+
+		}else if(measure->countTot >= goodMeasureTime){
+			// If the values are good I can show the averages value and I must check which flags are active
+			measure->countTot = 0;
+			// 0-0-0
+			if (!flags->highTemperatureFlag && !flags->highHeartRateFlag && !flags->lowOxygenFlag){
+				// TUTTO BENE
+
+				ds1307rtc_get_date_time(&datetime);
+
+				sprintf(strDateTime,"La misura è stata fatta: %d/%d/%d - %d:%d:%d\n\r", datetime.date, datetime.month, datetime.year, datetime.hours, datetime.minutes, datetime.seconds);
+				HAL_UART_Transmit(&huart2, strDateTime, strlen(strDateTime), HAL_MAX_DELAY);
+
+				showMeasures();
+			}
+			// 0-0-1
+			if (!flags->highTemperatureFlag && !flags->highHeartRateFlag && flags->lowOxygenFlag){
+				// IPOSSIEMIA
+				// check that isn't a first time
+				if(previousValueOxygen < lowOxygen){ // if isn't a first time, I don't show the danger screen
+
 					showMeasures();
-				}
-				// 0-0-1
-				if (!flags->highTemperatureFlag && !flags->highHeartRateFlag && flags->lowOxygenFlag){
-					// IPOSSIEMIA
-					// check that isn't a first time
-					if(previousValueOxygen < lowOxygen){ // if isn't a first time, I don't show the danger screen
 
-						showMeasures();
-
-					}else{
-						// show the danger screen (IPOSSIEMIA)
-						flags->dangerShowing = true;
-						diseases->hypoxemia = true;
-						showDangerIpossimeia();
-						HAL_TIM_Base_Stop_IT(&htim10);
-						HAL_TIM_Base_Start_IT(&htim11);
-					}
-
-				}
-
-				// 0-1-0
-				if (!flags->highTemperatureFlag && flags->highHeartRateFlag && !flags->lowOxygenFlag){
-					// TACHICARDIA
-					// check that isn't a first time
-					if(previousValueHeartRate > highHeartRate){ // if isn't a first time, I don't show the danger screen
-
-						showMeasures();
-
-					}else{
-						// show the danger screen (TACHICARDIA)
-						flags->dangerShowing = true;
-						diseases->tachycardia = true;
-						showDangerTachicardia();
-						HAL_TIM_Base_Stop_IT(&htim10);
-						HAL_TIM_Base_Start_IT(&htim11);
-					}
-				}
-
-				// 0-1-1
-				if (!flags->highTemperatureFlag && flags->highHeartRateFlag && flags->lowOxygenFlag){
-					// ARITMIA
-					// check that isn't a first time
-					if ((previousValueHeartRate > highHeartRate) && (previousValueOxygen < lowOxygen)){  // if isn't a first time, I don't show the danger screen
-
-						showMeasures();
-
-					}
-					else{
-						// show the danger screen (ARITMIA)
-						flags->dangerShowing = true;
-						diseases->arrhythmia = true;
-						showDangerAritmia();
-						HAL_TIM_Base_Stop_IT(&htim10);
-						HAL_TIM_Base_Start_IT(&htim11);
-					}
-				}
-
-				// 1-0-0
-				if (flags->highTemperatureFlag && !flags->highHeartRateFlag && !flags->lowOxygenFlag){
-					// FEBBRE
-					// check that isn't a first time
-					if(previousValueTemp > highTemperature){   // if isn't a first time, I don't show the danger screen
-
-						showMeasures();
-
-					}else{
-						// show the danger screen (FEBBRE)
-						flags->dangerShowing = true;
-						diseases->fever = true;
-						showDangerFebbre();
-						HAL_TIM_Base_Stop_IT(&htim10);
-						HAL_TIM_Base_Start_IT(&htim11);
-					}
-				}
-
-				// 1-0-1
-				if (flags->highTemperatureFlag && !flags->highHeartRateFlag && flags->lowOxygenFlag){
-					// COVID
-					// check that isn't a first time
-					if ((previousValueTemp > highTemperature) && (previousValueOxygen < lowOxygen)){	// if isn't a first time, I don't show the danger screen
-
-						showMeasures();
-
-					}
-					else{
-						// show the danger screen (COVID)
-						flags->dangerShowing = true;
-						diseases->covid = true;
-						showDangerCovid();
-						HAL_TIM_Base_Stop_IT(&htim10);
-						HAL_TIM_Base_Start_IT(&htim11);
-					}
-
-				}
-				// 1-1-0
-				if (flags->highTemperatureFlag && flags->highHeartRateFlag && !flags->lowOxygenFlag){
-					// FEBBRE ALTA
-					// check that isn't a first time
-					if ((previousValueTemp > highTemperature) && (previousValueHeartRate > highHeartRate)){		// if isn't a first time, I don't show the danger screen
-
-						showMeasures();
-
-					}
-					else{
-						// show the danger screen (FEBBRE ALTA)
-						flags->dangerShowing = true;
-						diseases->highFever = true;
-						showDangerFebbreAlta();
-						HAL_TIM_Base_Stop_IT(&htim10);
-						HAL_TIM_Base_Start_IT(&htim11);
-					}
-
-				}
-				// 1-1-1
-				if (flags->highTemperatureFlag && flags->highHeartRateFlag && flags->lowOxygenFlag){
-					// FEBBRE MOLTO ALTA
-					// check that isn't a first time
-					if ((previousValueTemp > highTemperature) && (previousValueHeartRate > highHeartRate) && (previousValueOxygen < lowOxygen)){	// if isn't a first time, I don't show the danger screen
-
-						showMeasures();
-
-					}
-					else{
-						// show the danger screen (FEBBRE MOLTO ALTA)
-						flags->dangerShowing = true;
-						diseases->highestFever = true;
-						showDangerFebbreMoltoAlta();
-						HAL_TIM_Base_Stop_IT(&htim10);
-						HAL_TIM_Base_Start_IT(&htim11);
-					}
+				}else{
+					// show the danger screen (IPOSSIEMIA)
+					flags->dangerShowing = true;
+					diseases->hypoxemia = true;
+					showDangerIpossimeia();
+					HAL_TIM_Base_Stop_IT(&htim10);
+					HAL_TIM_Base_Start_IT(&htim11);
 				}
 
 			}
 
-//		}else{
-//			// Increment the counter
-//			measure->countDangerShowing ++;
-//			if (measure->countDangerShowing >= showDangerDuration){
-//				flags->dangerShowing = false;
-//				measure->countDangerShowing = 0;
-//				showMeasures();
-//			}
-//		}
+			// 0-1-0
+			if (!flags->highTemperatureFlag && flags->highHeartRateFlag && !flags->lowOxygenFlag){
+				// TACHICARDIA
+				// check that isn't a first time
+				if(previousValueHeartRate > highHeartRate){ // if isn't a first time, I don't show the danger screen
+
+					showMeasures();
+
+				}else{
+					// show the danger screen (TACHICARDIA)
+					flags->dangerShowing = true;
+					diseases->tachycardia = true;
+					showDangerTachicardia();
+					HAL_TIM_Base_Stop_IT(&htim10);
+					HAL_TIM_Base_Start_IT(&htim11);
+				}
+			}
+
+			// 0-1-1
+			if (!flags->highTemperatureFlag && flags->highHeartRateFlag && flags->lowOxygenFlag){
+				// ARITMIA
+				// check that isn't a first time
+				if ((previousValueHeartRate > highHeartRate) && (previousValueOxygen < lowOxygen)){  // if isn't a first time, I don't show the danger screen
+
+					showMeasures();
+
+				}
+				else{
+					// show the danger screen (ARITMIA)
+					flags->dangerShowing = true;
+					diseases->arrhythmia = true;
+					showDangerAritmia();
+					HAL_TIM_Base_Stop_IT(&htim10);
+					HAL_TIM_Base_Start_IT(&htim11);
+				}
+			}
+
+			// 1-0-0
+			if (flags->highTemperatureFlag && !flags->highHeartRateFlag && !flags->lowOxygenFlag){
+				// FEBBRE
+				// check that isn't a first time
+				if(previousValueTemp > highTemperature){   // if isn't a first time, I don't show the danger screen
+
+					showMeasures();
+
+				}else{
+					// show the danger screen (FEBBRE)
+					flags->dangerShowing = true;
+					diseases->fever = true;
+					showDangerFebbre();
+					HAL_TIM_Base_Stop_IT(&htim10);
+					HAL_TIM_Base_Start_IT(&htim11);
+				}
+			}
+
+			// 1-0-1
+			if (flags->highTemperatureFlag && !flags->highHeartRateFlag && flags->lowOxygenFlag){
+				// COVID
+				// check that isn't a first time
+				if ((previousValueTemp > highTemperature) && (previousValueOxygen < lowOxygen)){	// if isn't a first time, I don't show the danger screen
+
+					showMeasures();
+
+				}
+				else{
+					// show the danger screen (COVID)
+					flags->dangerShowing = true;
+					diseases->covid = true;
+					showDangerCovid();
+					HAL_TIM_Base_Stop_IT(&htim10);
+					HAL_TIM_Base_Start_IT(&htim11);
+				}
+
+			}
+			// 1-1-0
+			if (flags->highTemperatureFlag && flags->highHeartRateFlag && !flags->lowOxygenFlag){
+				// FEBBRE ALTA
+				// check that isn't a first time
+				if ((previousValueTemp > highTemperature) && (previousValueHeartRate > highHeartRate)){		// if isn't a first time, I don't show the danger screen
+
+					showMeasures();
+
+				}
+				else{
+					// show the danger screen (FEBBRE ALTA)
+					flags->dangerShowing = true;
+					diseases->highFever = true;
+					showDangerFebbreAlta();
+					HAL_TIM_Base_Stop_IT(&htim10);
+					HAL_TIM_Base_Start_IT(&htim11);
+				}
+
+			}
+			// 1-1-1
+			if (flags->highTemperatureFlag && flags->highHeartRateFlag && flags->lowOxygenFlag){
+				// FEBBRE MOLTO ALTA
+				// check that isn't a first time
+				if ((previousValueTemp > highTemperature) && (previousValueHeartRate > highHeartRate) && (previousValueOxygen < lowOxygen)){	// if isn't a first time, I don't show the danger screen
+
+					showMeasures();
+
+				}
+				else{
+					// show the danger screen (FEBBRE MOLTO ALTA)
+					flags->dangerShowing = true;
+					diseases->highestFever = true;
+					showDangerFebbreMoltoAlta();
+					HAL_TIM_Base_Stop_IT(&htim10);
+					HAL_TIM_Base_Start_IT(&htim11);
+				}
+			}
+
+		}
 
 	}
 
