@@ -157,6 +157,24 @@ void showReplaceFinger(void){
 	ssd1306_UpdateScreen();
 }
 
+void showInhalation(void){
+	ssd1306_Fill(Black);
+	ssd1306_SetCursor(10, 18);
+	ssd1306_WriteString("Inhalation", Font_11x18, White);
+	ssd1306_UpdateScreen();
+}
+
+void showExhalation(void){
+	ssd1306_Fill(Black);
+	ssd1306_SetCursor(10, 18);
+	ssd1306_WriteString("Exhalation", Font_11x18, White);
+	ssd1306_UpdateScreen();
+}
+
+
+
+
+
 void compositeString(char* print, uint8_t mode){
 	Measure* measures = getMeasure();
 

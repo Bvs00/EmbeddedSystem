@@ -36,4 +36,8 @@ void showDangerFebbreMoltoAlta(void);
 
 void showReplaceFinger(void);
 
+void showInhalation(void);
+
+void showExhalation(void);
+
 void compositeString(char*, uint8_t);

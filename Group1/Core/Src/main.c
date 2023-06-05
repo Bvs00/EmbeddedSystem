@@ -57,6 +57,16 @@ Measure* getMeasure(void){
 }
 
 /*
+ * This function return the Pointer to the Disease structure.
+ * This function create a static pointer only once.
+ */
+Disease* getDisease(void){
+	static Disease diseases;
+	return &diseases;
+}
+
+
+/*
  * Flag init function
  */
 void FLAG_Init(void){
@@ -65,6 +75,19 @@ void FLAG_Init(void){
 	flags->highTemperatureFlag = 0;
 	flags->lowOxygenFlag = 0;
 	flags->dangerShowing = 0;
+	flags->inhalation = 0;
+	flags->exhalation = 0;
+}
+
+void DISEASE_Init(void){
+	Disease* diseases = getDisease();
+	diseases->arrhythmia = false;
+	diseases->covid = false;
+	diseases->fever = false;
+	diseases->highFever = false;
+	diseases->highestFever = false;
+	diseases->hypoxemia = false;
+	diseases->tachycardia = false;
 }
 
 /*
@@ -84,7 +107,7 @@ void MEASURE_Init(void){
 	measure->goodOxygen = 0;
 	measure->goodTemp = 0;
 	measure->ledCounter = 0;
-	measure->noteCount = 0;
+	measure->repetition = 0;
 	measure->sumHeartRate = 0;
 	measure->sumOxygen = 0;
 	measure->sumTemp = 0;
@@ -181,7 +204,7 @@ int main(void)
   HAL_TIM_OC_Start(&htim1, TIM_CHANNEL_1);  // Inizializzazione PWM canale 1
   HAL_TIM_OC_Start(&htim1, TIM_CHANNEL_2);  // Inizializzazione PWM canale 2
   HAL_TIM_Base_Start_IT(&htim10);  // Inizializzazione TIM BASE 10
-  HAL_TIM_Base_Start_IT(&htim11);  // Inizializzazione TIM BASE 11
+  //HAL_TIM_Base_Start_IT(&htim11);  // Inizializzazione TIM BASE 11
   HAL_ADC_Start(&hadc1);			// Inizializzazione ADC
 
 
@@ -205,9 +228,10 @@ int main(void)
   HAL_UART_Transmit(&huart2, mess2, strlen(mess2), HAL_MAX_DELAY);
 
 
-  //Init Measure and Flag Structures
+  //Init Measure, Flag and Disease Structures
   FLAG_Init();
   MEASURE_Init();
+  DISEASE_Init();
 
   // Define the ADC conversion in PollingMode
   HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
@@ -284,13 +308,14 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 
 		Flag* flags = getFlag();
 		Measure* measure = getMeasure();
+		Disease* diseases = getDisease();
 		MAX32664* max = getSensor();
 		float temperature;
 		uint32_t previousValueTemp, previousValueHeartRate, previousValueOxygen;
 
 		char valueTmp[20], valueHeart[20], valueOxygen[20];
 
-		if (!flags->dangerShowing){
+//		if (!flags->dangerShowing){
 
 			measure->countTot += 1;
 
@@ -411,9 +436,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				resetAvgValue();		// This line is important because I must reset the avg value, otherwise I would still have these value
 				measure->countTot = 0;	// This line is important because I must set to 0 the counter else if I'm in this state,
 										//I will have a loop because compute always the avg values but I have only one value.
-//				measure->badValueOxygen = 0;
-//				measure->badValueHeartRate = 0;
-//				measure->badValueTemp = 0;
 
 			}else if(measure->countTot >= goodMeasureTime){
 				// If the values are good I can show the averages value and I must check which flags are active
@@ -434,7 +456,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 					}else{
 						// show the danger screen (IPOSSIEMIA)
 						flags->dangerShowing = true;
+						diseases->hypoxemia = true;
 						showDangerIpossimeia();
+						HAL_TIM_Base_Stop_IT(&htim10);
+						HAL_TIM_Base_Start_IT(&htim11);
 					}
 
 				}
@@ -450,7 +475,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 					}else{
 						// show the danger screen (TACHICARDIA)
 						flags->dangerShowing = true;
+						diseases->tachycardia = true;
 						showDangerTachicardia();
+						HAL_TIM_Base_Stop_IT(&htim10);
+						HAL_TIM_Base_Start_IT(&htim11);
 					}
 				}
 
@@ -466,7 +494,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 					else{
 						// show the danger screen (ARITMIA)
 						flags->dangerShowing = true;
+						diseases->arrhythmia = true;
 						showDangerAritmia();
+						HAL_TIM_Base_Stop_IT(&htim10);
+						HAL_TIM_Base_Start_IT(&htim11);
 					}
 				}
 
@@ -481,7 +512,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 					}else{
 						// show the danger screen (FEBBRE)
 						flags->dangerShowing = true;
+						diseases->fever = true;
 						showDangerFebbre();
+						HAL_TIM_Base_Stop_IT(&htim10);
+						HAL_TIM_Base_Start_IT(&htim11);
 					}
 				}
 
@@ -497,7 +531,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 					else{
 						// show the danger screen (COVID)
 						flags->dangerShowing = true;
+						diseases->covid = true;
 						showDangerCovid();
+						HAL_TIM_Base_Stop_IT(&htim10);
+						HAL_TIM_Base_Start_IT(&htim11);
 					}
 
 				}
@@ -513,7 +550,10 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 					else{
 						// show the danger screen (FEBBRE ALTA)
 						flags->dangerShowing = true;
+						diseases->highFever = true;
 						showDangerFebbreAlta();
+						HAL_TIM_Base_Stop_IT(&htim10);
+						HAL_TIM_Base_Start_IT(&htim11);
 					}
 
 				}
@@ -529,74 +569,111 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 					else{
 						// show the danger screen (FEBBRE MOLTO ALTA)
 						flags->dangerShowing = true;
+						diseases->highestFever = true;
 						showDangerFebbreMoltoAlta();
+						HAL_TIM_Base_Stop_IT(&htim10);
+						HAL_TIM_Base_Start_IT(&htim11);
 					}
 				}
 
 			}
 
-		}else{
-			// Increment the counter
-			measure->countDangerShowing ++;
-			if (measure->countDangerShowing >= showDangerDuration){
-				flags->dangerShowing = false;
-				measure->countDangerShowing = 0;
-				showMeasures();
-			}
-		}
+//		}else{
+//			// Increment the counter
+//			measure->countDangerShowing ++;
+//			if (measure->countDangerShowing >= showDangerDuration){
+//				flags->dangerShowing = false;
+//				measure->countDangerShowing = 0;
+//				showMeasures();
+//			}
+//		}
 
 	}
 
-	// TIM11
+	// TIM11  -> 1ms
 	if (htim->Instance == TIM11){
 
-		if ((TIM1->CCER & TIM_CCER_CC1E) != 0){
-			Measure* measures = getMeasure();
+		// in 5 secondi devo respirare, poi aspetto 1 secondo ed infine altri 5 secondi espiro, ed aspetto 1 secondo per riiniziare. Il tutto viene fatto 5 volte.
+		// PWM del TIM1 ha un period di 1000. Quindi devo raggiungere un pulse di 1000 alla fine dei 5 secondi.
+		// Aumento di 0.2 il pulse ogni millisecondo.
 
-			uint32_t passValue;
+		Measure* measures = getMeasure();
+		Flag* flags = getFlag();
+		Disease* diseases = getDisease();
 
-			if (measures->ledCounter >= 2 * (timeInspirationOrEspriration - 1 ) + intervallLed){
-				measures->ledCounter = 0;
-			}
-			if (measures->ledCounter >= (timeInspirationOrEspriration - 1) + intervallLed){
-				passValue = measures->ledCounter - 2 * (measures->ledCounter - intervallLed - (timeInspirationOrEspriration - 1 ));
+		if (flags->dangerShowing){
+			if (measures->countDangerShowing <= showDangerDuration){
+
+				__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 2500+measures->countDangerShowing);
+				measures->countDangerShowing++;
+
 			}else{
-				passValue = measures->ledCounter;
+				flags->dangerShowing = false;
+				showInhalation();
+				measures->countDangerShowing = 0;
+				__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, measures->countDangerShowing);
+				flags->exhalation = false;
+				flags->inhalation = true;
 			}
+		}else if(diseases->arrhythmia && !flags->dangerShowing){
 
-			if ((passValue <= intervallLed || passValue >= (intervallLed +  timeInspirationOrEspriration -1 - (timeOffOnComplete/2)))){
-				passValue = 0;
-			}else{
-				passValue = (((passValue - intervallLed) * 100) / (timeInspirationOrEspriration - 1 ));
+			// mostra azione per aritmia
+
+		}else if(diseases->covid && !flags->dangerShowing){
+
+			// mostra azione per covid
+
+		}else if(diseases->fever && !flags->dangerShowing){
+
+			// mostra azione per fever
+
+		}else if(diseases->highFever && !flags->dangerShowing){
+
+			// mostra azione per high fever
+
+		}else if(diseases->highestFever && !flags->dangerShowing){
+
+			// mostra azione per highest fever
+
+		}else if(diseases->hypoxemia && !flags->dangerShowing){
+
+			// mostra azione per ipossiemia
+
+		}else if (diseases->tachycardia && !flags->dangerShowing && (measures->repetition <= repetitionBreathing)){
+			if ((measures->ledCounter < timeInhalationAndExhalation) && (flags->inhalation)){
+
+				__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, measures->ledCounter);
+
+				measures->ledCounter++;
+
 			}
+			if (measures->ledCounter == timeInhalationAndExhalation){
+				flags->exhalation = true;
+				flags->inhalation = false;
+				showExhalation();
+			}
+			if(measures->ledCounter == 0){
+				flags->exhalation = false;
+				flags->inhalation = true;
+				measures->repetition++;
+				showInhalation();
+			}
+			if((measures->ledCounter > 0) && (flags->exhalation)){
 
-			__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, passValue);
+				__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, measures->ledCounter);
 
-			measures->ledCounter += 1;
+				measures->ledCounter--;
+
+			}
+		}else{
+			showMeasures();
+			measures->repetition = 0;
+			DISEASE_Init();
+			HAL_TIM_Base_Stop_IT(&htim11);
+			HAL_TIM_Base_Start_IT(&htim10);
 		}
-
-		if ((TIM1->CCER & TIM_CCER_CC2E) != 0){
-			Measure* measures = getMeasure();
-
-			if (measures->noteCount >= 0 * intervallBuzzer && measures->noteCount < 1 * intervallBuzzer){
-				__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, (uint32_t)30);
-
-			}else if(measures->noteCount >= 1 * intervallBuzzer && measures->noteCount < 2 * intervallBuzzer){
-				__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, (uint32_t)60);
-
-			}else if(measures->noteCount >= 2 * intervallBuzzer && measures->noteCount < 3 * intervallBuzzer){
-				__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, (uint32_t)90);
-
-			}else if(measures->noteCount >= 3 * intervallBuzzer){
-				measures->noteCount = 0;
-			}
-
-			measures->noteCount++;
-		}
-
 
 	}
-
 
 }
 
