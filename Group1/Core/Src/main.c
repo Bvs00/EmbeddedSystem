@@ -251,25 +251,6 @@ int main(void)
   // Active the Oled_SSD1306
   showMeasures();
 
-//  showWhichActionTachycardia();
-
-//   showDangerIpossimeia();
-//
-//   HAL_Delay(3000);
-//
-//   showDangerTachicardia();
-//
-//   HAL_Delay(3000);
-//
-//   showDangerAritmia();
-//   HAL_Delay(3000);
-//   showDangerFebbre();
-//   HAL_Delay(3000);
-//   showDangerCovid();
-//   HAL_Delay(3000);
-//   showDangerFebbreAlta();
-//   HAL_Delay(3000);
-//   showDangerFebbreMoltoAlta();
 
   /* USER CODE END 2 */
 
@@ -490,7 +471,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 					// show the danger screen (IPOSSIEMIA)
 					flags->dangerShowing = true;
 					diseases->hypoxemia = true;
-					showDangerIpossimeia();
+					showDangerHypoxemia();
 					HAL_TIM_Base_Stop_IT(&htim10);
 					HAL_TIM_Base_Start_IT(&htim11);
 				}
@@ -508,7 +489,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 					// show the danger screen (TACHICARDIA)
 					flags->dangerShowing = true;
 					diseases->tachycardia = true;
-					showDangerTachicardia();
+					showDangerTachycardia();
 					HAL_TIM_Base_Stop_IT(&htim10);
 					HAL_TIM_Base_Start_IT(&htim11);
 				}
@@ -527,7 +508,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 					// show the danger screen (ARITMIA)
 					flags->dangerShowing = true;
 					diseases->arrhythmia = true;
-					showDangerAritmia();
+					showDangerArrhythmia();
 					HAL_TIM_Base_Stop_IT(&htim10);
 					HAL_TIM_Base_Start_IT(&htim11);
 				}
@@ -545,7 +526,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 					// show the danger screen (FEBBRE)
 					flags->dangerShowing = true;
 					diseases->fever = true;
-					showDangerFebbre();
+					showDangerFever();
 					HAL_TIM_Base_Stop_IT(&htim10);
 					HAL_TIM_Base_Start_IT(&htim11);
 				}
@@ -583,7 +564,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 					// show the danger screen (FEBBRE ALTA)
 					flags->dangerShowing = true;
 					diseases->highFever = true;
-					showDangerFebbreAlta();
+					showDangerHighFever();
 					HAL_TIM_Base_Stop_IT(&htim10);
 					HAL_TIM_Base_Start_IT(&htim11);
 				}
@@ -602,7 +583,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 					// show the danger screen (FEBBRE MOLTO ALTA)
 					flags->dangerShowing = true;
 					diseases->highestFever = true;
-					showDangerFebbreMoltoAlta();
+					showDangerHighestFever();
 					HAL_TIM_Base_Stop_IT(&htim10);
 					HAL_TIM_Base_Start_IT(&htim11);
 				}
@@ -636,36 +617,48 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				measures->countDangerShowing = 0;
 				__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, measures->countDangerShowing);
 			}
-		}else if(diseases->arrhythmia && !flags->dangerShowing){
+		}else if(diseases->arrhythmia && !flags->dangerShowing && (measures->repetition <= repetitionDuration)){
 
 			// mostra azione per aritmia
-			diseases->arrhythmia = false;
+			if (measures->repetition == 0)
+				showActionArrhythmia();
+			measures->repetition++;
 
 
-		}else if(diseases->covid && !flags->dangerShowing){
+		}else if(diseases->covid && !flags->dangerShowing && (measures->repetition <= repetitionDuration)){
 
 			// mostra azione per covid
-			diseases->covid = false;
+			if (measures->repetition == 0)
+				showActionCovid();
+			measures->repetition++;
 
-		}else if(diseases->fever && !flags->dangerShowing){
+		}else if(diseases->fever && !flags->dangerShowing && (measures->repetition <= repetitionDuration)){
 
 			// mostra azione per fever
-			diseases->fever = false;
+			if (measures->repetition == 0)
+				showActionFever();
+			measures->repetition++;
 
-		}else if(diseases->highFever && !flags->dangerShowing){
+		}else if(diseases->highFever && !flags->dangerShowing && (measures->repetition <= repetitionDuration)){
 
 			// mostra azione per high fever
-			diseases->highFever = false;
+			if (measures->repetition == 0)
+				showActionHighFever();
+			measures->repetition++;
 
-		}else if(diseases->highestFever && !flags->dangerShowing){
+		}else if(diseases->highestFever && !flags->dangerShowing && (measures->repetition <= repetitionDuration)){
 
 			// mostra azione per highest fever
-			diseases->highestFever = false;
+			if (measures->repetition == 0)
+				showActionHighestFever();
+			measures->repetition++;
 
-		}else if(diseases->hypoxemia && !flags->dangerShowing){
+		}else if(diseases->hypoxemia && !flags->dangerShowing && (measures->repetition <= repetitionDuration)){
 
 			// mostra azione per ipossiemia
-			diseases->hypoxemia = false;
+			if (measures->repetition == 0)
+				showActionHypoxemia();
+			measures->repetition++;
 
 		}else if (diseases->tachycardia && !flags->dangerShowing && (measures->repetition <= repetitionBreathing)){
 

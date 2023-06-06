@@ -15,39 +15,65 @@ enum Measure{
 	OXYGEN_MODE
 };
 
+/*
+ * Compute Average Value
+ */
 void computeAverageTemp(void);
 
 void computeAverageHeartRate(void);
 
 void computeAverageOxygen(void);
 
+/*
+ * Show Single Screen
+ */
 void showMeasures(void);
 
-void showDangerIpossimeia(void);
-
-void showDangerTachicardia(void);
-
-void showDangerAritmia(void);
-
-void showDangerFebbre(void);
-
-void showDangerCovid(void);
-
-void showDangerFebbreAlta(void);
-
-void showDangerFebbreMoltoAlta(void);
-
 void showReplaceFinger(void);
-
-void showInhalation(void);
-
-void showExhalation(void);
 
 void compositeString(char*, uint8_t);
 
 void showTerminalTime(DateTime datetime);
 
-// All action on Disease
+/*
+ * Show Danger Screen
+ */
+void showDangerHypoxemia(void);
+
+void showDangerTachycardia(void);
+
+void showDangerArrhythmia(void);
+
+void showDangerFever(void);
+
+void showDangerCovid(void);
+
+void showDangerHighFever(void);
+
+void showDangerHighestFever(void);
+
+/*
+ * Decide which action you have to do
+ */
+void showWhichAction(void);
+
+void showWhichActionTachycardia(void);
+
+void showWhichActionArrhythmia(void);
+
+void showWhichActionCovid(void);
+
+void showWhichActionFever(void);
+
+void showWhichActionHighFever(void);
+
+void showWhichActionHighestFever(void);
+
+void showWhichActionHypoxemia(void);
+
+/*
+ * All Action that you have to do
+ */
 void showActionTachycardia(void);
 
 void showActionHypoxemia(void);
@@ -62,22 +88,13 @@ void showActionHighFever(void);
 
 void showActionHighestFever(void);
 
-// show how to do
-void showWhichAction(void);
+/*
+ * Sub-functions that use in Action Tachycardia
+ */
+void showInhalation(void);
 
-void showWhichActionTachycardia(void);
+void showExhalation(void);
 
-void showWhichActionTachycardia(void);
-
-void showWhichActionTachycardia(void);
-
-void showWhichActionTachycardia(void);
-
-void showWhichActionTachycardia(void);
-
-void showWhichActionTachycardia(void);
-
-void showWhichActionTachycardia(void);
 
 
 

@@ -96,7 +96,8 @@ enum Threshould{
 enum animationDuration{ //all are indicate in ms, convert them as necessary
 	showDangerDuration = 6000,	// must be a odd value
 	timeInhalationAndExhalation = 5000,
-	repetitionBreathing = 5
+	repetitionBreathing = 5,
+	repetitionDuration = 5000
 };
 
 typedef struct{
