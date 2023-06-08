@@ -76,12 +76,12 @@ void Error_Handler(void);
 
 // We define the all treshould
 enum Threshould{
-	// alert tresholds
+	// alert thresholds
 	goodMeasureTime = 6,
 	goodNumberMeasure = 4,
 	countFail = 5,
 	highTemperature = 37,
-	highHeartRate = 60,	// 120
+	highHeartRate = 120,	// 120
 	lowOxygen = 96,	// 96
 	// confidence range
 	lowConfTemp = 20,
