@@ -145,7 +145,7 @@ void showDangerHypoxemia(){
 	ssd1306_SetCursor(17, 30);
 	ssd1306_WriteString("in your blood", Font_7x10, White);
 	ssd1306_SetCursor(37, 45);
-	ssd1306_WriteString("are low", Font_7x10, White);
+	ssd1306_WriteString("is low", Font_7x10, White);
 	ssd1306_UpdateScreen();
 }
 
@@ -253,15 +253,30 @@ void showWhichActionTachycardia(void){
 	ssd1306_UpdateScreen();
 }
 
-void showWhichActionArrhythmia(void);
+void showWhichActionArrhythmia(void){
+	Measure *measures = getMeasure();
+	measures->repetition = 0;
+}
 
-void showWhichActionCovid(void);
+void showWhichActionCovid(void){
+	Measure *measures = getMeasure();
+	measures->repetition = 0;
+}
 
-void showWhichActionFever(void);
+void showWhichActionFever(void){
+	Measure *measures = getMeasure();
+	measures->repetition = 0;
+}
 
-void showWhichActionHighFever(void);
+void showWhichActionHighFever(void){
+	Measure *measures = getMeasure();
+	measures->repetition = 0;
+}
 
-void showWhichActionHighestFever(void);
+void showWhichActionHighestFever(void){
+	Measure *measures = getMeasure();
+	measures->repetition = 0;
+}
 
 void showWhichActionHypoxemia(void);
 
@@ -306,14 +321,28 @@ void showActionTachycardia(void){
 
 void showActionHypoxemia(void){
 	ssd1306_Fill(Black);
-	ssd1306_SetCursor(5, 10);
-	ssd1306_WriteString("I recommend that you do", Font_7x10, White);
+	ssd1306_SetCursor(10, 5);
+	ssd1306_WriteString("I recommend you", Font_7x10, White);
+	ssd1306_SetCursor(0, 20);
+	ssd1306_WriteString("find a environment", Font_7x10, White);
+	ssd1306_SetCursor(15, 35);
+	ssd1306_WriteString("where there is", Font_7x10, White);
+	ssd1306_SetCursor(25, 50);
+	ssd1306_WriteString("more oxygen", Font_7x10, White);
+	ssd1306_UpdateScreen();
 }
 
 void showActionArrhythmia(void){
 	ssd1306_Fill(Black);
-	ssd1306_SetCursor(5, 10);
-	ssd1306_WriteString("I recommend that you do", Font_7x10, White);
+	ssd1306_SetCursor(10, 5);
+	ssd1306_WriteString("I recommend you", Font_7x10, White);
+	ssd1306_SetCursor(8, 20);
+	ssd1306_WriteString("to keep calm and", Font_7x10, White);
+	ssd1306_SetCursor(15, 35);
+	ssd1306_WriteString("adopt a better", Font_7x10, White);
+	ssd1306_SetCursor(35, 50);
+	ssd1306_WriteString("lifestyle", Font_7x10, White);
+	ssd1306_UpdateScreen();
 }
 
 void showActionCovid(void){

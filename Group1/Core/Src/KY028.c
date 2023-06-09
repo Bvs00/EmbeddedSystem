@@ -19,6 +19,6 @@ float getTemperature(void){
 	temp = 1.0/temp;
 	temp -= 273.15;
 
-	temp += 20;
+	temp += 15;
 	return temp;
 }

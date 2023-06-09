@@ -156,13 +156,15 @@ int8_t ds1307rtc_init()
 
 void ds1307rtc_start(){
 	DateTime datetime;
-	datetime.seconds=40;
-	datetime.minutes=04;
-	datetime.hours=17;
-	datetime.day=2;
-	datetime.year=23;
-	datetime.month=6;
-	datetime.date=5;
+//	datetime.seconds=00;
+//	datetime.minutes=48;
+//	datetime.hours=12;
+//	datetime.day=9;
+//	datetime.year=23;
+//	datetime.month=6;
+//	datetime.date=5;
+
+	ds1307rtc_get_date_time(&datetime);
 
 	ds1307rtc_set_date_time(&datetime);
 }

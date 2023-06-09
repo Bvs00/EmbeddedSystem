@@ -234,10 +234,7 @@ int main(void)
 
   // Init and Start DS1307RTC
   ds1307rtc_init();
-
   ds1307rtc_start();
-
-
 
 
   // Define the ADC conversion in PollingMode
@@ -245,7 +242,6 @@ int main(void)
 
   // Active the Oled_SSD1306
   showMeasures();
-
 
   /* USER CODE END 2 */
 
@@ -355,7 +351,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			measure->goodOxygen++;
 		}
 
-		// BASTARDATA DEL SECOLO MI VEDO I VALORI CHE HO
+		// SEE THE VALUE IN REAL TIME
 
 
 		sprintf(valueTmp, "Temperatura: %.2f\n\r", temperature);
@@ -459,7 +455,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			if (!flags->highTemperatureFlag && !flags->highHeartRateFlag && flags->lowOxygenFlag){
 				// IPOSSIEMIA
 				// check that isn't a first time
-				if(previousValueOxygen < lowOxygen){ // if isn't a first time, I don't show the danger screen
+				if(previousValueOxygen < lowOxygen && previousValueOxygen > lowConfOxygen){ // if isn't a first time, I don't show the danger screen
 					showTerminalTime(datetime);
 					showMeasures();
 				}else{
