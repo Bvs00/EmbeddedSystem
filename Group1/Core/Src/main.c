@@ -204,12 +204,8 @@ int main(void)
 
   // INIZIO
 
-  HAL_TIM_OC_Start(&htim1, TIM_CHANNEL_1);  // Inizializzazione PWM canale 1
-  HAL_TIM_OC_Start(&htim1, TIM_CHANNEL_2);  // Inizializzazione PWM canale 2
   HAL_TIM_Base_Start_IT(&htim10);  // Inizializzazione TIM BASE 10
-  //HAL_TIM_Base_Start_IT(&htim11);  // Inizializzazione TIM BASE 11
   HAL_ADC_Start(&hadc1);			// Inizializzazione ADC
-
 
   // Init Oled_SSD1306
   ssd1306_Init();
@@ -603,6 +599,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 		Flag* flags = getFlag();
 		Disease* diseases = getDisease();
 
+		HAL_TIM_OC_Start(&htim1, TIM_CHANNEL_2);  // START PWM canale 2 BUZZER
+
 		if (flags->dangerShowing){
 			if (measures->countDangerShowing <= showDangerDuration){
 				if (measures->countDangerShowing == (showDangerDuration/2))
@@ -615,6 +613,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				flags->dangerShowing = false;
 				measures->countDangerShowing = 0;
 				__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, measures->countDangerShowing);
+				HAL_TIM_OC_Stop(&htim1, TIM_CHANNEL_2);  // STOP PWM canale 2 BUZZER
+				HAL_TIM_OC_Start(&htim1, TIM_CHANNEL_1);  // START PWM canale 1
 			}
 		}else if(diseases->arrhythmia && !flags->dangerShowing && (measures->repetition <= repetitionDuration)){
 
@@ -661,6 +661,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 
 		}else if (diseases->tachycardia && !flags->dangerShowing && (measures->repetition <= repetitionBreathing)){
 
+
 			showActionTachycardia();
 
 		}else{
@@ -669,6 +670,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 			DISEASE_Init();
 			HAL_TIM_Base_Stop_IT(&htim11);
 			HAL_TIM_Base_Start_IT(&htim10);
+			HAL_TIM_OC_Stop(&htim1, TIM_CHANNEL_1);  // STOP PWM canale 1
 		}
 
 	}

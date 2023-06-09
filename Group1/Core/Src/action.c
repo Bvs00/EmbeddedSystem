@@ -282,10 +282,6 @@ void showActionTachycardia(void){
 
 	}
 	if (measures->ledCounter == timeInhalationAndExhalation){
-		char puls[30];
-		uint32_t pulse = __HAL_TIM_GET_COMPARE(&htim1,TIM_CHANNEL_1);
-		sprintf(puls, "PULSE = %d\n\r", pulse);
-		HAL_UART_Transmit(&huart2, puls, strlen(puls), HAL_MAX_DELAY);
 
 		__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_1, 0);
 		flags->exhalation = true;
