@@ -104,13 +104,13 @@ void compositeString(char* print, uint8_t mode){
 	}
 	else if (mode == HEART_RATE_MODE){
 		if (measures->averageValueHeartRate != 0)
-			sprintf(print, "%d BPM", measures->averageValueHeartRate);
+			sprintf(print, "%u BPM", measures->averageValueHeartRate);
 		else
 			strcpy(print, "- BPM");
 
 	}else if (mode == OXYGEN_MODE){
 		if (measures->averageValueOxygen != 0)
-			sprintf(print, "%d%%", measures->averageValueOxygen);
+			sprintf(print, "%u%%", measures->averageValueOxygen);
 		else
 			strcpy(print, "- %");
 	}
@@ -414,6 +414,59 @@ void showExhalation(void){
 	ssd1306_SetCursor(30, 25);
 	ssd1306_WriteString("Exhale", Font_11x18, White);
 	ssd1306_UpdateScreen();
+}
+
+/*
+ * Welcome Screen with instructions
+ */
+
+void showWelcome(void){
+	ssd1306_Fill(Black);
+	ssd1306_SetCursor(30, 25);
+	ssd1306_WriteString("Welcome", Font_11x18, White);
+	ssd1306_UpdateScreen();
+
+	HAL_Delay(2000);
+
+	ssd1306_Fill(Black);
+	ssd1306_SetCursor(2, 5);
+	ssd1306_WriteString("This device allows", Font_7x10, White);
+	ssd1306_SetCursor(5, 20);
+	ssd1306_WriteString("you to calculate", Font_7x10, White);
+	ssd1306_SetCursor(8, 35);
+	ssd1306_WriteString("Heart Rate, SpO2", Font_7x10, White);
+	ssd1306_SetCursor(18, 50);
+	ssd1306_WriteString("Temperature", Font_7x10, White);
+	ssd1306_UpdateScreen();
+
+	HAL_Delay(3000);
+
+	ssd1306_Fill(Black);
+	ssd1306_SetCursor(2, 10);
+	ssd1306_WriteString("You have to place", Font_7x10, White);
+	ssd1306_SetCursor(10, 25);
+	ssd1306_WriteString("your fingers on", Font_7x10, White);
+	ssd1306_SetCursor(7, 40);
+	ssd1306_WriteString("different sensor", Font_7x10, White);
+	ssd1306_UpdateScreen();
+
+	HAL_Delay(3000);
+
+	ssd1306_Fill(Black);
+	ssd1306_SetCursor(30, 5);
+	ssd1306_WriteString("Attention:", Font_7x10, White);
+	ssd1306_SetCursor(5, 20);
+	ssd1306_WriteString("To calculate your", Font_7x10, White);
+	ssd1306_SetCursor(27, 35);
+	ssd1306_WriteString("temperature", Font_7x10, White);
+	ssd1306_SetCursor(10, 50);
+	ssd1306_WriteString("3min are needed", Font_7x10, White);
+	ssd1306_UpdateScreen();
+
+	HAL_Delay(3000);
+
+	showMeasures();
+
 }
 
 

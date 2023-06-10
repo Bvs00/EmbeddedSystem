@@ -204,17 +204,17 @@ int main(void)
 
   // INIZIO
 
-  HAL_TIM_Base_Start_IT(&htim10);  // Inizializzazione TIM BASE 10
-  HAL_ADC_Start(&hadc1);			// Inizializzazione ADC
-
-  // Init Oled_SSD1306
+  // Init and Active the Oled_SSD1306
   ssd1306_Init();
+  showWelcome();
 
+  HAL_TIM_Base_Start_IT(&htim10);  	// Inizializzazione TIM BASE 10
+  HAL_ADC_Start(&hadc1);			// Inizializzazione ADC
 
   // Init MAX32664
   MAX32664* max = getSensor();
 
-  char mess[] = "PULSE NOK\n\r";
+  char mess[] = "PULSE !OK\n\r";
   char mess2[] = "PULSE OK\n\r";
 
   HAL_UART_Transmit(&huart2, mess, strlen(mess), HAL_MAX_DELAY);
@@ -236,12 +236,9 @@ int main(void)
   ds1307rtc_init();
   ds1307rtc_start();
 
-
   // Define the ADC conversion in PollingMode
   HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
 
-  // Active the Oled_SSD1306
-  showMeasures();
 
   /* USER CODE END 2 */
 
@@ -436,7 +433,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 
 
 		// I check that the count: 'badValue' for all measure (temperature, heart_rate and oxygen) is enough to show the error finger position
-		if (((measure->badValueHeartRate >= countFail) || (measure->badValueOxygen >= countFail) || (measure->badValueTemp >= countFail)) && (measure->countTot >= goodMeasureTime)){
+		if (((measure->badValueHeartRate >= countFail) || (measure->badValueOxygen >= countFail)) && (measure->countTot >= goodMeasureTime)){
 			showReplaceFinger();
 			resetAvgValue();		// This line is important because I must reset the avg value, otherwise I would still have these value
 			measure->countTot = 0;	// This line is important because I must set to 0 the counter else if I'm in this state,

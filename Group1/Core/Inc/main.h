@@ -80,11 +80,11 @@ enum Threshould{
 	goodMeasureTime = 10,
 	goodNumberMeasure = 7,
 	countFail = 5,
-	highTemperature = 36,	// 36
+	highTemperature = 37,	// 36
 	highHeartRate = 120,	// 120
 	lowOxygen = 96,	// 96
 	// confidence range
-	lowConfTemp = 20,
+	lowConfTemp = 32,
 	highConfTemp = 45,
 	lowConfHeartRate = 50,
 	highConfHeartRate = 220,

@@ -95,6 +95,12 @@ void showInhalation(void);
 
 void showExhalation(void);
 
+/*
+ * Welcome Screen with instructions
+ */
+
+void showWelcome(void);
+
 
 
 
