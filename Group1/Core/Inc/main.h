@@ -91,7 +91,7 @@ enum Threshould{
 	lowConfOxygen = 95,
 	highConfOxygen = 101,
 	acceptableConfidenceHeartRate = 95,
-	buzzerMelody = 2500
+	buzzerMelody = 500
 };
 
 enum animationDuration{ //all are indicate in ms, convert them as necessary
