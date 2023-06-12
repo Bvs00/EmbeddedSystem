@@ -599,7 +599,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim){
 				if (measures->countDangerShowing == (showDangerDuration/2))
 					showWhichAction();
 
-				__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, 2500);
+				__HAL_TIM_SET_COMPARE(&htim1, TIM_CHANNEL_2, buzzerMelody);
 				measures->countDangerShowing++;
 
 			}else{
